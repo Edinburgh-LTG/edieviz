@@ -1,0 +1,267 @@
+<rules name="negrel" type="xml" apply="all"> 
+
+<rule name="ngstobenegated1">
+  <seq>
+    <first>
+      <query match="ng[not(@neg='yes') and @type and not(@type='mod')]" attrs="neg='yes'"/>
+      <query match="ng[not(@neg='yes') and not(@type) and ent]" attrs="neg='yes'"/>
+    </first>
+    <seq mult="*">
+      <query match="*[.~'^(,|and|or|into)$']"/>
+      <first>
+        <query match="ng[not(@neg='yes') and @type and not(@type='mod')]" attrs="neg='yes'"/>
+        <query match="ng[not(@neg='yes') and not(@type) and ent]" attrs="neg='yes'"/>
+      </first>
+    </seq>
+  </seq>
+</rule>
+
+<rule name="ngstobenegated2">
+  <seq>
+    <query match="ng[not(@neg='yes') and not(@type) and not(ent)]"/>
+    <seq mult="+">
+      <query match="*[.~'^(,|and|or|into)$']"/>
+      <first>
+        <query match="ng[not(@neg='yes') and @type and not(@type='mod')]" attrs="neg='yes'"/>
+        <query match="ng[not(@neg='yes') and not(@type) and ent]" attrs="neg='yes'"/>
+      </first>
+    </seq>
+  </seq>
+</rule>
+
+<rule name="ngstobenegated3">
+  <seq>
+    <first>
+      <query match="ng[not(@neg='yes') and @type and not(@type='mod')]" attrs="neg='yes'"/>
+      <query match="ng[not(@neg='yes') and not(@type) and ent]" attrs="neg='yes'"/>
+    </first>
+    <seq mult="+">
+      <query match="*[.~'^(,|and|or|into)$']"/>
+      <first>
+        <query match="ng[not(@neg='yes') and @type and not(@type='mod')]" attrs="neg='yes'"/>
+        <query match="ng[not(@neg='yes') and not(@type) and ent]" attrs="neg='yes'"/>
+        <query match="ng[not(@neg='yes') and not(@type) and not(ent)]"/>
+      </first>
+    </seq>
+  </seq>
+</rule>
+
+<rule name="ngstobenegated">
+  <first>
+    <ref name="ngstobenegated1"/>
+    <ref name="ngstobenegated2"/>
+    <ref name="ngstobenegated3"/>
+  </first>
+</rule>
+
+<rule name="exclude1">
+  <and>
+    <query match="ng[ancestor::s[.~'^Exclude ']]"/>
+    <ref name="ngstobenegated"/>
+  </and>
+</rule>
+
+<rule name="exclude2">
+  <seq>
+    <ref name="ngstobenegated"/>
+    <query match="vg[w[@headv and @l~'^(exclude)$']]"/>
+  </seq>
+</rule>
+
+<rule name="be-difficult-to">
+  <seq>
+    <ref name="ngstobenegated"/>
+    <query match="vg[w[@headv and @l='be']]"/>
+    <query match="ag[w[.~'^(difficult)$']]"/>
+    <query match="vg[w[@headv and @l~'^(see|detect|identify|distinguish)$']]"/>
+  </seq>
+</rule>
+
+<rule name="it-be-difficult-to">
+  <seq>
+    <query match="ng[.~'^(It|it)$']"/>
+    <query match="vg[w[@headv and @l='be']]"/>
+    <query match="ag[w[.~'^(difficult)$']]"/>
+    <query match="vg[w[@headv and @l~'^(see|detect|identify|distinguish)$']]"/>
+    <ref name="ngstobenegated"/>
+  </seq>
+</rule>
+
+<rule name="unlikely-that">
+  <seq>
+    <query match="ng[.~'^(It|it)$']"/>
+    <query match="vg[w[@headv and @l~'^(be|seem)$']]"/>
+    <first>
+      <query match="ag[.~'unlikely']"/>
+      <query match="ag[.~'not likely']"/>
+      <query match="ag[.~'less likely']"/>
+      <query match="ag[.~'less likley']"/>
+    </first>
+    <query match="sg[.='that']"/>
+    <query match="*[not(@type)]" mult="*"/>
+    <ref name="ngstobenegated"/>
+  </seq>
+</rule>
+
+<rule name="unlikely">
+  <seq>
+    <ref name="ngstobenegated"/>
+    <query match="vg[w[@headv and @l='be']]" mult="?"/>
+    <first>
+      <query match="ag[.~'unlikely']"/>
+      <query match="ag[.~'not likely']"/>
+      <query match="ag[.~'less likely']"/>
+      <query match="ag[.~'less likley']"/>
+    </first>
+  </seq>
+</rule>
+
+<rule name="not-be-visible">
+  <seq>
+    <ref name="ngstobenegated"/>
+    <query match="vg[@neg='yes' and w[@headv and @l='be']]"/>
+    <query match="ag[w[.~'^(visible)$']]"/>
+  </seq>
+</rule>
+
+<rule name="cannot-be-vis">
+  <seq>
+    <ref name="ngstobenegated"/>
+    <query match="ng[.='which']" mult="?"/>
+    <query match="vg[@neg='yes' and w[@headv and @l~'^(visualize|detect|exclude)$']]"/>
+  </seq>
+</rule>
+
+<rule name="may-be-missed">
+  <seq>
+    <ref name="ngstobenegated"/>
+    <query match="ng[.='which']" mult="?"/>
+    <query match="vg[not(@neg) and w[@headv and @l='miss']]"/>
+  </seq>
+</rule>
+
+<rule name="may-be-due"><!-- not neg -->
+  <seq>
+    <query match="ng[not(@neg='yes') and @type and not(@type='mod')]"/>
+    <query match="ng[.='which']" mult="?"/>
+    <query match="vg[not(@neg) and .~'^may[^a-z]']"/>
+    <query match="ag[not(@neg) and .~'^due$']"/>
+  </seq>
+</rule>
+
+<rule name="not-of-ng">
+  <seq>
+    <query match="rg[.='not']"/>
+    <query match="pg[.='of']"/>
+    <ref name="ngstobenegated"/>
+  </seq>
+</rule>
+
+<rule name="may1">
+  <seq>
+    <ref name="ngstobenegated"/>
+    <query match="ng[.='which']" mult="?"/>
+    <query match="vg[not(@neg) and .~'^may[^a-z]']"/>
+  </seq>
+</rule>
+
+<rule name="may2">
+  <seq>
+    <query match="vg[not(@neg) and .~'^may[^a-z]']"/>
+    <ref name="ngstobenegated"/>
+  </seq>
+</rule>
+
+<rule name="lack-of">
+  <seq>
+    <query match="ng[not(@neg='yes') and ng[1][.='lack']]" attrs="neg='yes'"/>
+  </seq>
+</rule>
+
+<rule name="no-ng-to-suggest">
+  <seq>
+    <query match="ng[@neg='yes']"/>
+    <query match="ng" mult="?"/>
+    <first>
+      <query match="vg[not(@neg) and w[@headv and @l='suggest']]"/>
+      <seq>
+        <query match="ag[w[.='attributable']]"/>
+        <query match="pg[w[.='to']]"/>
+      </seq>
+    </first>
+    <ref name="ngstobenegated"/>
+  </seq>
+</rule>
+
+<rule name="not-suggestive-of-ng">
+  <seq>
+    <query match="vg[@neg='yes']"/>
+    <query match="ag[w[.='suggestive' or .='typical']]"/>
+    <query match="pg[w[.='of']]"/>
+    <ref name="ngstobenegated"/>
+  </seq>
+</rule>
+
+<rule name="concern">
+  <query match="ng[.~'concern (of|for|about|regarding) ']" attrs="neg='yes'"/>
+</rule>
+
+<rule name="nil-acute">
+  <seq>
+    <query match="ag[not(@neg) and .~'^([Nn]il|[Nn]ot|NIL|NOT)[^A-Za-z]']" attrs="neg='yes'"/>
+  </seq>
+</rule>
+
+<rule name="rather-than">
+  <seq>
+    <first>
+      <query match="pg[.~'rather than']"/>
+      <query match="pg[.='than' and preceding-sibling::ag[.~'more']]"/>
+    </first>
+    <ref name="ngstobenegated"/>
+  </seq>
+</rule>
+
+<rule name="nor-ng">
+  <seq>
+    <query match="w[.='nor']"/>
+    <ref name="ngstobenegated"/>
+  </seq>
+</rule>
+
+<rule name="No-sentence">
+  <first>
+    <query match="ng[ancestor::s[.~'^(.)?No ' and not(.~'^No change')] and not(@neg='yes') and @type and not(@type='mod') and not(preceding-sibling::w[.='.'])]" attrs="neg='yes'"/>
+    <query match="ng[ancestor::s[.~'^(.)?There is no evidence of '] and not(@neg='yes') and @type and not(@type='mod') and not(preceding-sibling::w[.='and'])]" attrs="neg='yes'"/>
+    <query match="ng[ancestor::s[.~'^Is there evidence.*\?'] and not(@neg='yes') and @type and not(@type='mod')]" attrs="neg='yes'"/>
+    <query match="ng[ancestor::s[.~'^Is there a.*\?'] and not(@neg='yes') and @type and not(@type='mod')]" attrs="neg='yes'"/>
+  </first>
+</rule>
+
+<rule name="all">
+  <first>
+    <ref name="be-difficult-to"/>
+    <ref name="it-be-difficult-to"/>
+    <ref name="unlikely"/>
+    <ref name="unlikely-that"/>
+    <ref name="cannot-be-vis"/>
+    <ref name="may-be-missed"/>
+    <ref name="may-be-due"/>
+    <ref name="not-be-visible"/>
+    <ref name="rather-than"/>
+    <ref name="lack-of"/>
+    <ref name="no-ng-to-suggest"/>
+    <ref name="not-suggestive-of-ng"/>
+    <ref name="concern"/>
+    <ref name="nil-acute"/>
+    <ref name="nor-ng"/>
+    <ref name="No-sentence"/>
+    <ref name="exclude1"/>
+    <ref name="exclude2"/>
+    <ref name="not-of-ng"/>
+<!--    <ref name="may1"/>-->
+<!--    <ref name="may2"/>-->
+  </first>
+</rule>
+
+</rules>

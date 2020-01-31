@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    {% block head %}
+      <title>{% block title %}{% endblock %}</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <meta name="HandheldFriendly" content="true">
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,400,600,600italic">
+      <link rel="stylesheet" href="{{ url_for('.static', filename="css/normalize.css") }}">
+      <link rel="stylesheet" href="{{ url_for('.static', filename="css/milligram.min.css") }}">
+      <link rel="stylesheet" href="{{ url_for('.static', filename="css/style.css") }}">
+    {% endblock %}
+  </head>
+  <body>
+    <main class="wrapper">
+      <nav class="navigation">
+        <section class="container">
+          <a class="navigation-title" href="{{ url_for('homepage') }}" title="EdIE-Viz">EdIE-Viz</a>
+          <ul class="navigation-list float-right">
+            <li class="navigation-item {%if request.path == '/about'%}active{% endif %}">
+              <a class="navigation-link" href="{{ url_for('about') }}">About</a>
+            </li>
+          </ul>
+        </section>
+      </nav>
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="footer">
+      <section class="container">
+        <nav class="nav">
+          {% block footer %}
+            <div class="footer-text text-center">
+              &copy; Copyright 2019 by <a href="https://www.ltg.ed.ac.uk/">LTG</a>.
+            </div>
+          {% endblock %}
+        </nav>
+      </section>
+    </footer>
+  </body>
+</html>

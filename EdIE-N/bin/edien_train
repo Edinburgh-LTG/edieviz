@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+import os
+import random
+import numpy as np
+import torch
+from mlconf import YAMLLoaderAction, ArgumentParser
+from sklearn.metrics import confusion_matrix, f1_score
+
+from edien.train_utils import train_loop
+
+
+np.set_printoptions(precision=5, suppress=True)
+
+
+if __name__ == "__main__":
+
+    parser = ArgumentParser(description='Dependency parser trainer')
+
+    # parser.add_argument('--visualise', action='store_true',
+    #                     help='Whether to visualise training or not.')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Whether to print additional info such '
+                        'as model and vocabulary info.')
+    parser.add_argument('--load_blueprint', action=YAMLLoaderAction)
+    parser.add_argument('--continue_training', action='store_true',
+                        help='Whether to continue training previous model.')
+
+    conf = parser.parse_args()
+
+    conf = train_loop(conf)

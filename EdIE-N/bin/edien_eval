@@ -1,0 +1,165 @@
+#!/usr/bin/env python
+import os
+import torch
+from argparse import ArgumentParser
+from mlconf import Blueprint
+from edien import EdIENPath
+from edien.train_utils import only_pseudorandomness_please, eval_loop
+
+
+def make_neg_predict_consistent(negs, ents):
+    """Propagate decision of B- token to following I- tokens"""
+    assert len(negs) == len(ents)
+    neg_decision = None
+    for i in range(len(negs)):
+        assert negs[i] is not None
+        if ents[i][:2] == 'B-':
+            neg_decision = negs[i]
+        elif ents[i][:2] == 'I-':
+            if neg_decision is not None:
+                negs[i] = neg_decision
+        else:
+            neg_decision = None
+    return negs, ents
+
+
+def write_conll(sentences, y, preds, bp):
+
+    targets = bp.data.targets
+    subfolder = bp.data.dataset.foldername
+    folder_path = bp.paths.for_output(subfolder)
+
+    if not os.path.isdir(folder_path):
+        print('Creating directory %s' % folder_path)
+        os.makedirs(folder_path)
+
+    for target in targets:
+        if getattr(preds, target, None) is None:
+            print("==Warning==: Skipping %s as wasn't predicted\n" % target)
+            continue
+        filename = '%s.conll' % target
+        out_path = os.path.join(folder_path, filename)
+        i = 0
+        chunks = []
+        for s in sentences:
+            sent_len = len(s.tokens)
+            # TODO: for cases where we do sentence prediction
+            # need to refactor this part of the code
+            sent_ner_preds = getattr(preds, target)[i:i + sent_len]
+            conll_line = s.to_conll(sent_ner_preds, target)
+            chunks.append('%s\n' % conll_line)
+            i += sent_len
+        print('Writing conll output to %s' % out_path)
+        with open(out_path, 'w') as f:
+            f.writelines(chunks)
+
+        if target != 'negation' and 'negation' in targets:
+            filename = 'negation_%s.conll' % target
+            out_path = os.path.join(folder_path, filename)
+            i = 0
+            chunks = []
+            for s in sentences:
+                sent_len = len(s.tokens)
+                # Quickly change to evaluate neg with conll scoring
+                # We use gold entities - only evaluating negation here
+                sent_ner_gold = getattr(s, target)
+                sent_neg_gold = getattr(s, 'negation')
+                sent_ner_preds = list(getattr(preds, target)[i:i + sent_len])
+                sent_neg_preds = list(getattr(preds, 'negation')[i:i + sent_len])
+
+                sent_neg_preds, sent_ner_preds = make_neg_predict_consistent(sent_neg_preds, sent_ner_preds)
+
+                comb_preds = [('%sneg_%s' % (ner[:2], ner[2:])) if (neg == 'neg' and ner != 'O') else ner
+                              for neg, ner in zip(sent_neg_preds, sent_ner_preds)]
+                comb_gold = [('%sneg_%s' % (ner[:2], ner[2:])) if (neg == 'neg' and ner != 'O') else ner
+                             for neg, ner in zip(sent_neg_gold, sent_ner_gold)]
+                lines = []
+                for fields in zip(s.tokens, s.pos_tags, comb_gold, comb_preds):
+                    lines.append('%s\n' % ' '.join(fields))
+                chunk = ''.join(lines)
+                chunk = '%s\n' % chunk
+                chunks.append(chunk)
+                i += sent_len
+            print('Writing conll output to %s' % out_path)
+            with open(out_path, 'w') as f:
+                f.writelines(chunks)
+
+
+if __name__ == "__main__":
+
+    parser = ArgumentParser(description='Dependency parser trainer')
+
+    parser.add_argument('--experiment', type=str, required=True,
+                        help='Path to folder of experiment')
+    parser.add_argument('--dataset',
+                        default='dev',
+                        choices=['train', 'dev', 'test'],
+                        help='Whether to test on test set - default is dev')
+    # parser.add_argument('--visualise', action='store_true',
+    #                     help='Whether to visualise training or not.')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Whether to print additional info such '
+                        'as model and vocabulary info.')
+
+    args = parser.parse_args()
+
+    blueprint_file = os.path.join(args.experiment, EdIENPath.BP_FILE)
+    print(blueprint_file)
+    if not os.path.isfile(blueprint_file):
+        raise ValueError("Couldn't find blueprint file %s" % blueprint_file)
+    conf = Blueprint.from_file(blueprint_file)
+    print('Successfully loaded blueprint from %s' % blueprint_file)
+
+    only_pseudorandomness_please(conf.seed)
+
+    conf.paths.experiment_name = conf.name
+    # Make sure we aren't trying to create vocab on dev
+    conf.data.vocab_encoder.load_if_exists = True
+    bp = conf.build()
+
+    model_path = bp.paths.model_path
+    print('Loading model from %s' % model_path)
+    model = bp.model.load(model_path)
+
+    if conf.device.startswith('cuda'):
+        # Set default gpu
+        model.to(conf.device)
+
+    # If we pass --test argument eval on test set
+    # NOTE: default is eval on dev
+    if args.dataset == 'test':
+        print('Evaluating on test..')
+        test = bp.data.test_vars(bp.paths)
+        test_sents = bp.data.test_sents
+        # data_folder = bp.data.dataset.test_filename
+        data_folder = bp.data.dataset.test_path
+        base_foldername = os.path.basename(os.path.normpath(data_folder))
+    elif args.dataset == 'dev':
+        print('Evaluating on dev..')
+        test = bp.data.dev_vars(bp.paths)
+        test_sents = bp.data.dev_sents
+        data_folder = bp.data.dataset.dev_path
+        base_foldername = os.path.basename(os.path.normpath(data_folder))
+    else:
+        print('Evaluating on train..')
+        test = bp.data.train_vars(bp.paths)
+        test_sents = bp.data.train_sents
+        data_folder = bp.data.dataset.train_paths[0]
+        # data_folder = bp.data.dataset.train_path
+        base_foldername = os.path.basename(os.path.normpath(data_folder))
+        base_foldername += '_train'
+
+    # Set basename on bp to access in write_conll
+    bp.data.dataset.foldername = base_foldername
+
+    for task in bp.model.model.tasks:
+        model.model.tasks[task].label_vocab = bp.data.vocab_encoder.vocabs[task]
+
+    preds = model.predict(test)
+
+    dec_test_y = bp.data.decode(test)
+    dec_preds = bp.data.decode(preds)
+
+    eval_loop(dec_test_y, dec_preds, verbose=args.verbose)
+    # Only pass in blueprint for ESS dataset below
+    write_conll(test_sents, dec_test_y, dec_preds, bp)

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}About EdIE-Viz{% endblock %}
+{% block content %}
+<header class="header">
+  <section class="container">
+    <div class="row">
+      <div class="column">
+        <h4 class="lead">About <a href="{{ url_for('homepage') }}">EdIE-Viz</a></h4>
+      </div>
+    </div>
+  </section>
+</header>
+<section class="container">
+  <div class="row">
+    <div class="column">
+      <p><a href="{{ url_for('homepage') }}">EdIE-Viz</a> is an interactive natural language processing demo to mine information from brain imaging reports written by radiologists.
+        Given the raw text of a radiology report for a brainscan, the demo creates output for two systems that <span class="hl">automatically extract medical <mark class="ent ent-finding pos" data-entity="finding">findings</mark> and their
+        <mark class="mod mod-loc-location pos" data-entity="location">locations</mark> related to the <mark class="mod mod-loc-brain pos" data-entity="brain">brain</mark></span>.
+        Both systems also differentiate between definite positive <mark class="ent ent-finding pos" data-entity="finding">findings</mark> and ones which turn out to be negative when inspecting the scan image.
+        A finding is considered negative if it is negated in the text (e.g. no <mark class="ent ent-ischaemic-stroke neg" data-entity="ischaemic stroke">ischaemic stroke</mark>).</p>
+        <p>The demo compares <span class="hl">EdIE-R</span>, a rule-based system developed for this type of data, to <span class="hl">EdIE-N</span>,
+        a neural network based algorithm to do the same tasks.  Both systems were developed using the same data annotated by domain experts and have been validated on the same unseen test data.
+       {# (REF to previous publication?, REF to demo paper once published). #}
+       The systems and demo were developed by staff at the <a href="https://www.ltg.ed.ac.uk/">Language Technology Group</a> at the <a href="https://www.ed.ac.uk/informatics">University of Edinburgh</a> as part of an ongoing collaboration with neurologists, radiologists and medical researchers at the University of Edinburgh.</p>
+{# Link to new medical NLP website #}
+        <p>Both systems have different strengths and weaknesses. EdIE-R performs highly accurately for observations for which it has rules and for which it contains examples in its in-built lexicon.  EdIE-N is trained on far less training data than neural network systems tend to be trained on given the limitations of data access for this domain and the challenges involved to get such data annotated with ground truth by domain experts.  However, it is still able to recognise the majority of observations and is also much more robust to spelling errors or spelling variations than the rule-based system. You can try that out by introducing a few errors into the text.  For example, change “infarct” to “infact” or “small vessel disease” to “small vessl disease” and see how the two systems compare.</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column">
+      <h4 class="lead" style="text-align: center">How to use <a href="{{ url_for('homepage') }}">EdIE-Viz</a></h4>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column">
+      <ul class="instructions">
+        <li>The <a href="{{ url_for('homepage') }}">demo</a> provides a synthetic example of a realistic brain imaging report so you can try it out yourself.</li>
+        <li>You can get the predictions of the models for the input text by clicking on the <span class="button button-outline mybutton" value="Annotate">Annotate</span> button.</li>
+        <li>You can reset any changes you made to the text by clicking on the <span class="button button-outline mybutton" value="Reset Example">Reset Example</span> button.</li>
+        <li>If you are feeling adventurous, you can modify the text to investigate the strengths and weaknesses of the two models.</li>
+    </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column">
+      <h4 class="lead" style="text-align: center">Publications</h4>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column">
+        <p>
+        <a href="https://doi.org/10.1186/s13326-019-0211-7">Beatrice Alex, Claire Grover, Richard Tobin, Cathie Sudlow, Grant Mair and William Whiteley (2019). Text Mining Brain Imaging Reports. Journal of Biomedical Semantics, 10, 23, 2019, </a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

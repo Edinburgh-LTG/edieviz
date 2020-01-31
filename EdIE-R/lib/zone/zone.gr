@@ -1,0 +1,140 @@
+<rules name="zone" type="xml" apply="all">
+
+<rule name="clinicaldetails">
+  <query match="p[.~'[Cc]linical ([Dd]etails|[Dd]ata|[Hh]istory)']"/>
+</rule>
+
+<rule name="notclinicaldetails">
+  <query match="p[not(.~'[Cc]linical ([Dd]etails|[Dd]ata|[Hh]istory)')]"/>
+</rule>
+
+<rule name="report">
+  <query match="p[.~'(^CT HEAD:$|CT Head$|[Rr]eport([^a-z]|$)|^[Dd]escription([^a-z]|$)|[Ff]indings)']"/>
+</rule>
+
+<rule name="conclusion">
+  <query match="p[.~'([Cc]onclusion|[Oo]pinion|[Cc]omment|[Ss]ummary|[Ii]mpression|IMPRESSION|CONCLUSION|OPINION|SUMMARY|COMMENT)']"/>
+</rule>
+
+<rule name="endmarker">
+  <first>
+    <query match="p[.~' [Dd]r\.? ']"/>
+    <query match="p[.~'RACSKUHCT']"/>
+    <query match="p[.~'[A-Z][A-Z]/[A-Z][A-Z]']"/>
+  </first>
+</rule>
+
+<rule name="p">
+  <query match="p"/>
+</rule>
+
+<rule name="zonewithconcl">
+  <seq>
+    <ref name="notclinicaldetails" mult="*"/>
+    <seq wrap="cdetails">
+      <ref name="clinicaldetails"/>
+      <repeat-until name="p">
+        <ref name="report"/>
+      </repeat-until>
+    </seq>
+    <seq wrap="report">
+      <ref name="report"/>
+      <repeat-until name="p">
+        <ref name="conclusion"/>
+      </repeat-until>
+    </seq>
+    <seq wrap="conclusion">
+      <ref name="conclusion"/>
+      <repeat-until name="p">
+        <ref name="endmarker"/>
+      </repeat-until>
+    </seq>
+    <seq wrap="end">
+      <ref name="endmarker"/>
+      <query match="p" mult="*"/>
+    </seq>
+  </seq>
+</rule>
+
+<rule name="zonenoconcl">
+  <seq>
+    <ref name="notclinicaldetails" mult="*"/>
+    <seq wrap="cdetails">
+      <ref name="clinicaldetails"/>
+      <repeat-until name="p">
+        <ref name="report"/>
+      </repeat-until>
+    </seq>
+    <seq wrap="report">
+      <ref name="report"/>
+      <repeat-until name="p">
+        <ref name="endmarker"/>
+      </repeat-until>
+    </seq>
+    <seq wrap="end">
+      <ref name="endmarker"/>
+      <query match="p" mult="*"/>
+    </seq>
+  </seq>
+</rule>
+
+<rule name="zonenoend">
+  <seq>
+    <ref name="notclinicaldetails" mult="*"/>
+    <seq wrap="cdetails">
+      <ref name="clinicaldetails"/>
+      <repeat-until name="p">
+        <ref name="report"/>
+      </repeat-until>
+    </seq>
+    <seq wrap="report">
+      <ref name="report"/>
+      <repeat-until name="p">
+        <ref name="conclusion"/>
+      </repeat-until>
+    </seq>
+    <seq wrap="conclusion">
+      <ref name="conclusion"/>
+      <query match="p" mult="*"/>
+    </seq>
+  </seq>
+</rule>
+
+<rule name="zonenoconclorend">
+  <seq>
+    <ref name="notclinicaldetails" mult="*"/>
+    <seq wrap="cdetails">
+      <ref name="clinicaldetails"/>
+      <repeat-until name="p">
+        <ref name="report"/>
+      </repeat-until>
+    </seq>
+    <seq wrap="report">
+      <ref name="report"/>
+      <query match="p" mult="+"/>
+    </seq>
+  </seq>
+</rule>
+
+<rule name="nostructure">
+  <seq wrap="report">
+    <start/>
+    <query match="p" mult="+"/>
+    <end/>
+  </seq>
+</rule>
+
+<rule name="all">
+  <first>
+    <ref name="zonewithconcl"/>
+    <ref name="zonenoconcl"/>
+    <ref name="zonenoend"/>
+<!--    <ref name="clinicaldetails" wrap="CD"/>
+    <ref name="report" wrap="RP"/>
+    <ref name="conclusion" wrap="CN"/>
+    <ref name="endmarker" wrap="EN"/>-->
+    <ref name="zonenoconclorend"/>
+  </first>
+</rule>
+
+</rules>

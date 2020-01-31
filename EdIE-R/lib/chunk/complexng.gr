@@ -1,0 +1,145 @@
+<rules name="others" type="xml" apply="all"> 
+
+<rule name="ngofng" wrap="ng">
+  <seq>
+    <query match="ng"/>
+    <query match="pg[.~'^(of|OF|Of)$']"/>
+    <query match="ng"/>
+  </seq>
+</rule>
+
+<rule name="ngcoord" wrap="ng">
+  <seq>
+    <and>
+      <query match="ng[.~'^(No|no|NO) ']"/>
+      <first>
+        <ref name="ngofng"/>
+        <query match="ng"/>
+      </first>
+    </and>
+    <seq mult="+">
+      <seq mult="*">
+        <query match="w[.=',' or .='/']"/>
+        <and>
+          <not>
+            <query match="ng[.~'[, ]or ']"/>
+          </not>
+          <first>
+            <ref name="ngofng"/>
+            <query match="ng"/>
+          </first>
+        </and>
+      </seq>
+      <first>
+        <seq mult="+">
+          <query match="w[.=',']" mult="?"/>
+          <query match="w[.='or' or .='nor']"/>
+          <first>
+            <ref name="ngofng"/>
+            <query match="ng"/>
+          </first>
+        </seq>
+        <seq>
+          <query match="w[.=',']"/>
+          <query match="ng[.~'[, ]or ']"/>
+        </seq>
+      </first>
+    </seq>
+  </seq>
+</rule>
+
+<rule name="ngofngnotneg" wrap="ng">
+  <seq>
+    <query match="ng[not(.~'^[Nn]o ')]"/>
+    <query match="pg[.~'^(of|OF|Of)$']"/>
+    <query match="ng"/>
+  </seq>
+</rule>
+
+<rule name="ngcoord-pos" wrap="ng">
+  <seq>
+    <first>
+      <ref name="ngofngnotneg"/>
+      <query match="ng[not(.~'^[Nn]o ')]"/>
+    </first>
+    <seq mult="+">
+      <seq mult="*">
+        <query match="w[.=',']"/>
+        <and>
+          <not>
+            <query match="ng[.~'[, ]or ']"/>
+          </not>
+          <first>
+            <ref name="ngofngnotneg"/>
+            <query match="ng[not(.~'^[Nn]o ') and not(@type)]"/>
+          </first>
+        </and>
+      </seq>
+      <first>
+        <seq mult="+">
+          <query match="w[.='or']"/>
+          <first>
+            <ref name="ngofngnotneg"/>
+            <query match="ng[not(.~'^[Nn]o ') and not(@type)]"/>
+          </first>
+        </seq>
+      </first>
+    </seq>
+  </seq>
+</rule>
+
+<!-- typical/suggestive of ng or ng -->
+<rule name="ngcoord-afterof" wrap="ng">
+  <seq>
+    <seq suppress="true">
+      <query match="ag[@pred='yes']"/>
+      <query match="pg[.='of']"/>
+    </seq>
+    <query match="ng"/>
+    <seq mult="+">
+      <seq mult="*">
+        <query match="w[.=',']"/>
+        <and>
+          <not>
+            <query match="ng[.~'[, ]or ']"/>
+          </not>
+          <query match="ng"/>
+        </and>
+      </seq>
+      <first>
+        <seq mult="+">
+          <query match="w[.='or']"/>
+          <query match="ng"/>
+        </seq>
+      </first>
+    </seq>
+  </seq>
+</rule>
+
+<!-- no evidence of the patients previous stroke -->
+<rule name="negngng" wrap="ng">
+  <seq>
+    <and>
+      <query match="ng[.~'^(No|no|NO) ']"/>
+      <first>
+        <ref name="ngofng"/>
+        <query match="ng"/>
+      </first>
+    </and>
+    <seq mult="+">
+      <query match="ng[not(.~'^(No|no|NO) ') and not(.//timex) and not(@neg)]"/>
+    </seq>
+  </seq>
+</rule>
+
+<rule name="all">
+  <first>
+    <ref name="negngng"/>
+    <ref name="ngcoord"/>
+    <ref name="ngofng"/>
+    <ref name="ngcoord-pos"/>
+    <ref name="ngcoord-afterof"/>
+  </first>
+</rule>
+
+</rules>

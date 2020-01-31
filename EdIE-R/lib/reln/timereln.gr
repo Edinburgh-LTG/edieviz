@@ -1,0 +1,66 @@
+<rules name="label" type="xml" apply="all"> 
+
+<rule name="stroke-oldtime1">
+  <seq wrap="reln" attrs="type='time'">
+    <query match="ng[@type~'stroke$' and not(@time-old)]" attrs="time-old='true'"/>
+    <first mult="*">
+      <query match="w[not(.=',' and following-sibling::w[1][.~'^(and|but)$'])]"/>
+      <query match="ag"/>
+      <query match="pg"/>
+      <query match="vg"/>
+    </first>
+    <query match="ent[@type='mod' and @stime='old']"/>
+  </seq>
+</rule>
+
+<rule name="stroke-oldtime2">
+  <seq wrap="reln" attrs="type='time'">
+    <query match="ent[@type='mod' and @stime='old']"/>
+    <first mult="*">
+      <query match="w[not(.=',' and following-sibling::w[1][.~'^(and|but)$'])]"/>
+      <query match="ag"/>
+      <query match="pg"/>
+      <query match="vg"/>
+      <query match="ent[@type='mod' and @sloc]"/>
+    </first>
+    <query match="ng[@type~'stroke$' and not(@time-old)]" attrs="time-old='true'"/>
+  </seq>
+</rule>
+
+<rule name="stroke-recenttime1">
+  <seq wrap="reln" attrs="type='time'">
+    <query match="ng[@type~'stroke$' and not(@time-recent)]" attrs="time-recent='true'"/>
+    <first mult="*">
+      <query match="w[not(.=',' and following-sibling::w[1][.~'^(and|but)$'])]"/>
+      <query match="ag"/>
+      <query match="pg"/>
+      <query match="vg"/>
+    </first>
+    <query match="ent[@type='mod' and @stime='recent']"/>
+  </seq>
+</rule>
+
+<rule name="stroke-recenttime2">
+  <seq wrap="reln" attrs="type='time'">
+    <query match="ent[@type='mod' and @stime='recent']"/>
+    <first mult="*">
+      <query match="w[not(.=',' and following-sibling::w[1][.~'^(and|but)$'])]"/>
+      <query match="ag"/>
+      <query match="pg"/>
+      <query match="vg"/>
+      <query match="ent[@type='mod' and @sloc]"/>
+    </first>
+    <query match="ng[@type~'stroke$' and not(@time-recent)]" attrs="time-recent='true'"/>
+  </seq>
+</rule>
+
+<rule name="all">
+  <first>
+    <ref name="stroke-oldtime1"/>
+    <ref name="stroke-recenttime1"/>
+    <ref name="stroke-oldtime2"/>
+    <ref name="stroke-recenttime2"/>
+  </first>
+</rule>
+
+</rules>

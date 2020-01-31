@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}EdIE-Viz{% endblock %}
+{% block content %}
+<header class="header">
+  <section class="container">
+    <div class="row">
+      <div class="column">
+        <h4 class="lead"><span class="hl">Ed</span>inburgh <span class="hl">I</span>nformation <span class="hl">E</span>xtraction <span class="hl">Vi</span>suali<span class="hl">z</span>ation for Radiology Reports</h4>
+      </div>
+    </div>
+    <div class="row">
+      <div class="column">
+        <form action="{{ url_for('annotate') }}" method="post">
+          <label class="label" for="queryField">Synthetic radiology report example</label>
+          {% if results %}
+          <textarea 
+            placeholder="Your sentences here.."
+            id="queryField"
+            name="submit-text"
+            rows="10"
+            columns="80"></textarea>
+          {% else %}
+          <textarea 
+            placeholder="Your sentences here.."
+            id="queryField"
+            name="submit-text"
+            rows="10"
+            columns="80">{{example}}</textarea>
+          {% endif %}
+        <input class="button button-outline" value="Annotate" type="submit">
+        <input class="button button-clear"
+         onClick="document.getElementById('queryField').value = '{{example}}';"
+         value="Reset Example"
+         type="button">
+        </form>
+      </div>
+    </div>
+  </section>
+</header>
+{% for system, result in results.items() %}
+  <section class="container">
+    <div class="row">
+      <div class="column">
+        <h3 class="hl">{{ system }} Predictions</h3>
+          {% for sentence in result %}
+            <div class="sentence">
+              {# TODO: This will break if we have overlapping mods and entities. #}
+              {% set flag = namespace(inside_ent=false, inside_mod=false) %} 
+              {% for token, ent, mod, neg in zip(sentence['tokens'], sentence['ner_tags'], sentence['mod_tags'], sentence['negation']) %}
+
+                {% if ent.startswith('B-') %}
+                  {% if flag.inside_ent %}
+                    </mark>
+                  {% endif %}
+                  {% set flag.inside_ent = true %}
+                {% endif %}
+
+                {% if ent == 'O' %} 
+                  {% if flag.inside_ent %}
+                    </mark>
+                  {% endif %}
+                  {% set flag.inside_ent = false %}
+                {% endif %}
+
+                {% if mod.startswith('B-') %}
+                  {% if flag.inside_mod %}
+                    </mark>
+                  {% endif %}
+                  {% set flag.inside_mod = true %}
+                {% endif %}
+
+                {% if mod == 'O' %} 
+                  {% if flag.inside_mod %}
+                    </mark>
+                  {% endif %}
+                  {% set flag.inside_mod = false %}
+                {% endif %}
+
+                {% if ent.startswith('B-') %}
+                  <mark class="ent ent-{{ent[2:] | replace("_", "-") }} {{neg}}" data-entity="{{ent[2:] | replace("_", " ") }}">
+                {% endif %}
+
+                {% if mod.startswith('B-') %}
+                  <mark class="mod mod-{{mod[2:] | replace("_", "-") }} {{neg}}" data-entity="{{mod[2:] | replace("_", " ") }}">
+                {% endif %}
+
+                {{ token }}
+
+              {% endfor %}
+            </div>
+          {% endfor %}
+  </section>
+{% endfor %}
+  <section class="container disclaimers">
+    <div class="row">
+      <div class="column">
+        <h5>Disclaimers</h5>
+        <ul>
+          <li><b>Do not input any sensitive data</b>. This demo is not using https, so the <b>text will not be encrypted</b>.</li>
+          <li>The systems are specifically developed from brain imaging reports and not for reports of images of other parts of the body.</li>
+          <li>The demo output is automatically generated and may contain errors. We do not take responsibility for the correctness of results.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+{% endblock %}

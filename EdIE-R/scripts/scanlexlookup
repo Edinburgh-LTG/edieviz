@@ -1,0 +1,28 @@
+#!/bin/sh 
+
+usage="scanlexlookup <input.xml >output.xml"
+descr="Look up words in various lexicons and add appropriate attributes."
+
+. `dirname $0`/setup
+
+while [ $# -gt 0 ]; do
+  arg=$1
+  shift
+  case $arg in
+    *)
+      echo "usage: $usage" >&2
+      exit 2
+  esac
+done
+
+# lone 'haematoma' etc will be haemorrhagic_stroke unless changed to
+# subdural_haematoma in the context of 'subdural' etc by the first
+# lxreplace step.
+
+lib=$here/lib/ner
+
+lxtransduce -q "s[@proc='yes']" -a typewords $lib/scanlexlookup.gr |
+lxreplace -q "w[.~'^h[a]?ematoma(s|ta)?$' and not(preceding-sibling::w[1][.~'^[Ss]ub[-]?dural$']) and ancestor::s[.//w[.~'^[Ss]ub[-]?dural$'] or preceding-sibling::s[.//w[.~'^[Ss]ub[-]?dural$']]]]" -t "<w>&attrs;<xsl:attribute name='type'>subdural_haematoma</xsl:attribute>&children;</w>" |
+lxtransduce -q "s[@proc='yes']" -a timeandloc $lib/scanlexlookup.gr |
+lxreplace -q "@type[not(.~'.')]" -t ""
+

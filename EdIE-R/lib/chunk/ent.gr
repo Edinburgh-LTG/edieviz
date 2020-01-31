@@ -1,0 +1,216 @@
+<rules name="ent" type="xml" apply="all"> 
+
+<rule name="type1" wrap="ent" attrs="type='atrophy'">
+  <first>
+    <query match="w[@type='atrophy' and @multi='yes']" mult="+"/>
+    <query match="w[@type='atrophy' and @multi='no']"/>
+  </first>
+</rule>
+
+<rule name="type2" wrap="ent" attrs="type='haemorrhagic_stroke'">
+  <first>
+    <query match="w[@type='haemorrhagic_stroke' and @multi='yes']" mult="+"/>
+    <query match="w[@type='haemorrhagic_stroke' and @multi='no']"/>
+  </first>
+</rule>
+
+<rule name="type3" wrap="ent" attrs="type='ischaemic_stroke'">
+  <first>
+    <query match="w[@type='ischaemic_stroke' and @multi='yes']" mult="+"/>
+    <query match="w[@type='ischaemic_stroke' and @multi='no']"/>
+  </first>
+</rule>
+
+<rule name="type4" wrap="ent" attrs="type='mening_tumour'">
+  <first>
+    <query match="w[@type='mening_tumour' and @multi='yes']" mult="+"/>
+    <query match="w[@type='mening_tumour' and @multi='no']"/>
+  </first>
+</rule>
+
+<rule name="type5" wrap="ent" attrs="type='metast_tumour'">
+  <first>
+    <query match="w[@type='metast_tumour' and @multi='yes']" mult="+"/>
+    <query match="w[@type='metast_tumour' and @multi='no']"/>
+  </first>
+</rule>
+
+<rule name="type6" wrap="ent" attrs="type='small_vessel_disease'">
+  <first>
+    <query match="w[@type='small_vessel_disease' and @multi='yes']" mult="+"/>
+    <query match="w[@type='small_vessel_disease' and @multi='no']"/>
+  </first>
+</rule>
+
+<rule name="type7" wrap="ent" attrs="type='stroke'">
+  <first>
+    <query match="w[@type='stroke' and @multi='yes']" mult="+"/>
+    <query match="w[@type='stroke' and @multi='no']"/>
+  </first>
+</rule>
+
+<rule name="type8" wrap="ent" attrs="type='subdural_haematoma'">
+  <first>
+    <query match="w[@type='subdural_haematoma' and @multi='yes']" mult="+"/>
+    <query match="w[@type='subdural_haematoma' and @multi='no']"/>
+  </first>
+</rule>
+
+<rule name="type9" wrap="ent" attrs="type='tumour'">
+  <first>
+    <query match="w[@type='tumour' and @multi='yes']" mult="+"/>
+    <query match="w[@type='tumour' and @multi='no']"/>
+  </first>
+</rule>
+
+<rule name="type10" wrap="ent" attrs="type='microhaemorrhage'">
+  <first>
+    <query match="w[@type='microhaemorrhage' and @multi='yes']" mult="+"/>
+    <query match="w[@type='microhaemorrhage' and @multi='no']"/>
+  </first>
+</rule>
+
+<rule name="type11" wrap="ent" attrs="type='subarachnoid_haemorrhage'">
+  <first>
+    <query match="w[@type='subarachnoid_haemorrhage' and @multi='yes']" mult="+"/>
+    <query match="w[@type='subarachnoid_haemorrhage' and @multi='no']"/>
+  </first>
+</rule>
+
+<rule name="type12" wrap="ent" attrs="type='haemorrhagic_transformation'">
+  <first>
+    <query match="w[@type='haemorrhagic_transformation' and @multi='yes']" mult="+"/>
+    <query match="w[@type='haemorrhagic_transformation' and @multi='no']"/>
+  </first>
+</rule>
+
+<rule name="type13" wrap="ent" attrs="type='glioma_tumour'">
+  <first>
+    <query match="w[@type='glioma_tumour' and @multi='yes']" mult="+"/>
+    <query match="w[@type='glioma_tumour' and @multi='no']"/>
+  </first>
+</rule>
+
+<rule name="type">
+  <first>
+    <ref name="type1"/>
+    <ref name="type2"/>
+    <ref name="type3"/>
+    <ref name="type4"/>
+    <ref name="type5"/>
+    <ref name="type6"/>
+    <ref name="type7"/>
+    <ref name="type8"/>
+    <ref name="type9"/>
+    <ref name="type10"/>
+    <ref name="type11"/>
+    <ref name="type12"/>
+    <ref name="type13"/>
+  </first>
+</rule>
+
+<!-- complexity because of "cortical PACI" - need PACI to be picked up
+as type="ischaemic_stroke" in first pass and then it will be an sloc
+in second pass -->
+<rule name="mod1" wrap="ent" attrs="sloc='cortical'">
+  <first>
+    <seq>
+      <query match="w[@sloc='cortical']"/>
+      <query match="w[@sloc='cortical' and not(@type)]" mult="+"/>
+    </seq>
+    <query match="w[@sloc='cortical']"/>
+  </first>
+</rule>
+
+<!-- simple version for second pass -->
+<rule name="mod1b" wrap="ent" attrs="sloc='cortical'">
+  <query match="w[@sloc='cortical']" mult="+"/>
+</rule>
+
+<!-- as above -->
+<rule name="mod2" wrap="ent" attrs="sloc='deep'">
+  <first>
+    <seq>
+      <query match="w[@sloc='deep']"/>
+      <query match="w[@sloc='deep' and not(@type)]" mult="+"/>
+    </seq>
+    <query match="w[@sloc='deep']"/>
+  </first>
+</rule>
+
+<!-- simple version for second pass -->
+<rule name="mod2b" wrap="ent" attrs="sloc='deep'">
+  <query match="w[@sloc='deep']" mult="+"/>
+</rule>
+
+<!-- as above -->
+<rule name="mod3" wrap="ent" attrs="stime='old'">
+  <first>
+    <seq>
+      <query match="w[@stime='old']"/>
+      <query match="w[@stime='old' and not(@type)]" mult="+"/>
+    </seq>
+    <query match="w[@stime='old']"/>
+  </first>
+</rule>
+
+<!-- simple version for second pass -->
+<rule name="mod3b" wrap="ent" attrs="stime='old'">
+  <query match="w[@stime='old']" mult="+"/>
+</rule>
+
+<!-- as above -->
+<rule name="mod4" wrap="ent" attrs="stime='recent'">
+  <first>
+    <seq>
+      <query match="w[@stime='recent']"/>
+      <query match="w[@stime='recent' and not(@type)]" mult="+"/>
+    </seq>
+    <query match="w[@stime='recent']"/>
+  </first>
+</rule>
+
+<!-- simple version for second pass -->
+<rule name="mod4b" wrap="ent" attrs="stime='recent'">
+  <query match="w[@stime='recent']" mult="+"/>
+</rule>
+
+<!-- block intracerebral in 'intracerebral haemorrhage' from being
+marked as deep -->
+<rule name="mod0b">
+  <seq>
+    <start/>
+      <query match="w[.~'^[Ii]ntra']"/>
+      <query match="w[not(.~'^(h[a]?emorrhage|h[a]?ematoma[s]?)$')]" mult="*"/>
+      <query match="w[.~'^(h[a]?emorrhage|h[a]?ematoma[s]?)$']"/>
+    <end/>
+  </seq>
+</rule>
+
+<rule name="moda">
+  <first>
+    <ref name="mod1"/>
+    <ref name="mod2"/>
+    <ref name="mod3"/>
+    <ref name="mod4"/>
+  </first>
+</rule>
+
+<rule name="modb">
+  <first>
+    <ref name="mod0b"/>
+    <ref name="mod1b"/>
+    <ref name="mod2b"/>
+    <ref name="mod3b"/>
+    <ref name="mod4b"/>
+  </first>
+</rule>
+
+<rule name="all">
+  <first>
+    <ref name="type"/>
+    <ref name="moda"/>
+  </first>
+</rule>
+
+</rules>

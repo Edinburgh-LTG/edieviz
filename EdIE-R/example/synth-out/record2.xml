@@ -1,0 +1,149 @@
+<document id="0001">
+<meta>
+<attr name="type">CT</attr>
+<attr name="order_item">CT Head</attr>
+<header>Report 0001: CT (CT Head)</header>
+<labels>
+<l id="1">Ischaemic stroke, deep, recent</l>
+<l id="2">Ischaemic stroke, deep, old</l>
+<l id="3">Ischaemic stroke, cortical, recent</l>
+<l id="4" choice="pos">Ischaemic stroke, cortical, old</l>
+<l id="5">Ischaemic stroke, underspecified</l>
+<l id="6">Haemorrhagic stroke, deep, recent</l>
+<l id="7">Haemorrhagic stroke, deep, old</l>
+<l id="8">Haemorrhagic stroke, lobar, recent</l>
+<l id="9">Haemorrhagic stroke, lobar, old</l>
+<l id="10">Haemorrhagic stroke, underspecified</l>
+<l id="11">Stroke, underspecified</l>
+<l id="12">Tumour, meningioma</l>
+<l id="13">Tumour, metastasis</l>
+<l id="14">Tumour, glioma</l>
+<l id="15">Tumour, other</l>
+<l id="16" choice="pos">Small vessel disease</l>
+<l id="17" choice="pos">Atrophy</l>
+<l id="18">Subdural haematoma</l>
+<l id="19">Subarachnoid haemorrhage, aneurysmal</l>
+<l id="20">Subarachnoid haemorrhage, other</l>
+<l id="21">Microbleed, deep</l>
+<l id="22">Microbleed, lobar</l>
+<l id="23">Microbleed, underspecified</l>
+<l id="24">Haemorrhagic transformation</l>
+</labels>
+</meta>
+<text>
+<cdetails><p><s proc="yes" id="s1"><w g="JJ" id="w667" pws="yes" p="JJ">Clinical</w> <w headn="yes" g="NNS" id="w676" pws="yes" p="NNS" l="detail">Details</w></s></p></cdetails>
+
+<report><p><s proc="yes" id="s2"><w headn="yes" g="NN" id="w685" pws="yes" p="NN" l="report">Report</w></s></p>
+
+<p><s proc="yes" id="s3"><w g="DT" id="w693" pws="yes" p="DT">No</w> <ent neg="yes" stime="old" type="mod" id="e1"><w stime="old" g="JJ" id="w696" pws="yes" p="JJ">previous</w></ent> <w headn="yes" g="NN" id="w705" pws="yes" p="NN" l="brain">brain</w> <w headv="yes" prevtag="NN" g="VBG" id="w711" pws="yes" p="VBG" l="image" vstem="image">imaging</w> <w g="IN" id="w719" pws="yes" p="IN">for</w> <w headn="yes" g="NN" id="w723" pws="yes" p="NN" l="comparison">comparison</w><w g="." id="w733" pws="no" sb="true" p=".">.</w></s></p>
+
+<p><s proc="yes" id="s4"><w g="JJ" id="w736" pws="yes" p="JJ">Cerebral</w> <ent type="atrophy" id="e2"><w multi="yes" type="atrophy" g="JJ" id="w745" pws="yes" p="JJ">involutional</w> <w headn="yes" multi="yes" type="atrophy" g="NN" id="w758" pws="yes" p="NN" l="change">change</w></ent><w g="," id="w764" pws="no" p=",">,</w> <w g="JJ" id="w766" pws="yes" p="JJ" l="advanced" vstem="advance">advanced</w> <w g="IN" id="w775" pws="yes" p="IN">for</w> <w headn="yes" g="NN" id="w779" pws="yes" p="NN" l="age">age</w><w g="." id="w782" pws="no" sb="true" p=".">.</w></s>  <s proc="yes" id="s5"><w headn="yes" g="NN" id="w785" pws="yes" p="NN" l="evidence">Evidence</w> <w g="IN" id="w794" pws="yes" p="IN">of</w> <w g="DT" id="w797" pws="yes" p="DT">an</w> <ent stime="old" type="mod" id="e3"><w stime="old" g="JJ" id="w800" pws="yes" p="JJ">old</w></ent> <w g="NN" id="w804" pws="yes" p="JJ">left</w> <w g="JJ" id="w809" pws="yes" p="JJ">posterior</w> <ent sloc="cortical" type="mod" id="e4"><w sloc="cortical" g="JJ" id="w819" pws="yes" p="JJ">temporal</w></ent><w g=":" id="w827" pws="no" p=":">/</w><ent sloc="cortical" type="mod" id="e5"><w sloc="cortical" g="JJ" id="w828" pws="no" p="JJ">parietal</w></ent> <ent type="ischaemic_stroke" id="e6"><w headn="yes" multi="no" type="ischaemic_stroke" g="NN" id="w837" pws="yes" p="NN" l="infarct">infarct</w></ent><w g="." id="w844" pws="no" sb="true" p=".">.</w></s>  <s proc="yes" id="s6"><ent type="small_vessel_disease" id="e7"><w multi="yes" type="small_vessel_disease" g="NN" id="w847" pws="yes" p="NN" l="white">White</w> <w multi="yes" type="small_vessel_disease" g="NN" id="w853" pws="yes" p="NN" l="matter">matter</w> <w headn="yes" multi="yes" type="small_vessel_disease" g="NN" id="w860" pws="yes" p="NN" l="hypoattenuation">hypoattenuation</w></ent> <w g="IN" id="w876" pws="yes" p="IN">in</w> <w headv="yes" g="VBG" id="w879" pws="yes" p="VBG" l="keep">keeping</w> <w g="IN" id="w887" pws="yes" p="IN">with</w> <w g="JJ" id="w892" pws="yes" p="JJ">moderate</w> <ent type="small_vessel_disease" id="e8"><w multi="yes" type="small_vessel_disease" g="JJ" id="w901" pws="yes" p="JJ">small</w> <w multi="yes" type="small_vessel_disease" g="NN" id="w907" pws="yes" p="NN" l="vessel">vessel</w> <w headn="yes" multi="yes" type="small_vessel_disease" g="NN" id="w914" pws="yes" p="NN" l="change">change</w></ent><w g="." id="w920" pws="no" sb="true" p=".">.</w></s>  <s proc="yes" id="s7"><w g="DT" id="w923" pws="yes" p="DT">No</w> <w g="JJ" id="w926" pws="yes" p="JJ">intracranial</w> <ent neg="yes" type="tumour" id="e9"><w headn="yes" multi="no" type="tumour" g="NN" id="w939" pws="yes" p="NN" l="mass">mass</w></ent><w g="," id="w943" pws="no" p=",">,</w> <ent neg="yes" type="ischaemic_stroke" id="e10"><w headn="yes" multi="no" type="ischaemic_stroke" g="NN" id="w945" pws="yes" p="NN" l="infarct">infarct</w></ent> <w g="CC" id="w953" pws="yes" p="CC">or</w> <ent neg="yes" type="haemorrhagic_stroke" id="e11"><w headn="yes" multi="no" type="haemorrhagic_stroke" g="NN" id="w956" pws="yes" p="NN" l="haemorrhage">haemorrhage</w></ent><w g="." id="w967" pws="no" sb="true" p=".">.</w></s>  <s proc="yes" id="s8"><w g="DT" id="w970" pws="yes" p="DT">The</w> <w headn="yes" g="NN" id="w974" pws="yes" p="NN" l="skull">skull</w> <w headn="yes" g="NN" id="w980" pws="yes" p="NN" l="vault">vault</w> <w g="CC" id="w986" pws="yes" p="CC">and</w> <w headn="yes" g="NN" id="w990" pws="yes" p="NN" l="skull">skull</w> <w headn="yes" g="NN" id="w996" pws="yes" p="NN" l="base">base</w> <w headv="yes" g="VBP" id="w1001" pws="yes" p="VBP" l="appear">appear</w> <w g="JJ" id="w1008" pws="yes" p="JJ">unremarkable</w><w g="." id="w1020" pws="no" sb="true" p=".">.</w></s></p></report>
+
+<conclusion><p><s proc="yes" id="s9"><w headn="yes" g="NN" id="w1023" pws="yes" p="NN" l="opinion">Opinion</w><w g=":" id="w1030" pws="no" p=":">:</w></s></p>
+
+<p><s proc="yes" id="s10"><w g="JJ" id="w1033" pws="yes" p="JJ" l="advanced" vstem="advance">Advanced</w> <w g="JJ" id="w1042" pws="yes" p="JJ">cerebral</w> <ent type="atrophy" id="e12"><w headn="yes" multi="no" type="atrophy" g="NN" id="w1051" pws="yes" p="NN" l="atrophy">atrophy</w></ent><w g="," id="w1058" pws="no" p=",">,</w> <w g="JJ" id="w1060" pws="yes" p="JJ">moderate</w> <ent type="small_vessel_disease" id="e13"><w multi="yes" type="small_vessel_disease" g="JJ" id="w1069" pws="yes" p="JJ">small</w> <w multi="yes" type="small_vessel_disease" g="NN" id="w1075" pws="yes" p="NN" l="vessel">vessel</w> <w headn="yes" multi="yes" type="small_vessel_disease" g="NN" id="w1082" pws="yes" p="NN" l="disease">disease</w></ent> <w g="CC" id="w1090" pws="yes" p="CC">and</w> <ent stime="old" type="mod" id="e14"><w stime="old" g="JJ" id="w1094" pws="yes" p="JJ">old</w></ent> <ent type="ischaemic_stroke" id="e15"><w headn="yes" multi="no" type="ischaemic_stroke" g="NNS" id="w1098" pws="yes" p="NNS" l="infarct">infarcts</w></ent> <w g="IN" id="w1107" pws="yes" p="IN">as</w> <w headv="yes" g="VBN" id="w1110" pws="yes" p="VBN" l="describe">described</w> <w g="JJ" id="w1120" pws="yes" p="JJ">above</w><w g="." id="w1125" pws="no" sb="true" p=".">.</w></s> <s proc="yes" id="s11"><w g="DT" id="w1127" pws="yes" p="DT">No</w> <ent neg="yes" stime="recent" type="mod" id="e16"><w stime="recent" g="JJ" id="w1130" pws="yes" p="JJ">acute</w></ent> <w g="JJ" id="w1136" pws="yes" p="JJ">intracranial</w> <w headn="yes" g="NN" id="w1149" pws="yes" p="NN" l="finding" vstem="find">finding</w><w g="." id="w1156" pws="no" sb="true" p=".">.</w></s></p></conclusion>
+
+
+</text>
+<standoff>
+<relations>
+  <relation id="r1" type="loc">
+    <argument text="infarct" ref="e6" arg1="true"/>
+    <argument text="temporal" ref="e4" arg2="true"/>
+  </relation><relation id="r2" type="loc">
+    <argument text="infarct" ref="e6" arg1="true"/>
+    <argument text="parietal" ref="e5" arg2="true"/>
+  </relation>
+<relation id="r3" type="time">
+    <argument arg1="true" ref="e6" text="infarct"/>
+    <argument arg2="true" ref="e3" text="old"/>
+  </relation><relation id="r4" type="time">
+    <argument arg1="true" ref="e15" text="infarcts"/>
+    <argument arg2="true" ref="e14" text="old"/>
+  </relation>
+</relations>
+
+<ents>
+  <ent neg="yes" stime="old" type="mod" id="e1">
+    <attribute name="negated"/><parts>
+      <part ew="w696" sw="w696">previous</part>
+    </parts>
+  </ent>
+  <ent type="atrophy" id="e2">
+    <parts>
+      <part ew="w758" sw="w745">involutional change</part>
+    </parts>
+  </ent>
+  <ent stime="old" type="mod" id="e3">
+    <parts>
+      <part ew="w800" sw="w800">old</part>
+    </parts>
+  </ent>
+  <ent sloc="cortical" type="mod" id="e4">
+    <parts>
+      <part ew="w819" sw="w819">temporal</part>
+    </parts>
+  </ent>
+  <ent sloc="cortical" type="mod" id="e5">
+    <parts>
+      <part ew="w828" sw="w828">parietal</part>
+    </parts>
+  </ent>
+  <ent type="ischaemic_stroke" id="e6">
+    <parts>
+      <part ew="w837" sw="w837">infarct</part>
+    </parts>
+  </ent>
+  <ent type="small_vessel_disease" id="e7">
+    <parts>
+      <part ew="w860" sw="w847">White matter hypoattenuation</part>
+    </parts>
+  </ent>
+  <ent type="small_vessel_disease" id="e8">
+    <parts>
+      <part ew="w914" sw="w901">small vessel change</part>
+    </parts>
+  </ent>
+  <ent neg="yes" type="tumour" id="e9">
+    <attribute name="negated"/><parts>
+      <part ew="w939" sw="w939">mass</part>
+    </parts>
+  </ent>
+  <ent neg="yes" type="ischaemic_stroke" id="e10">
+    <attribute name="negated"/><parts>
+      <part ew="w945" sw="w945">infarct</part>
+    </parts>
+  </ent>
+  <ent neg="yes" type="haemorrhagic_stroke" id="e11">
+    <attribute name="negated"/><parts>
+      <part ew="w956" sw="w956">haemorrhage</part>
+    </parts>
+  </ent>
+  <ent type="atrophy" id="e12">
+    <parts>
+      <part ew="w1051" sw="w1051">atrophy</part>
+    </parts>
+  </ent>
+  <ent type="small_vessel_disease" id="e13">
+    <parts>
+      <part ew="w1082" sw="w1069">small vessel disease</part>
+    </parts>
+  </ent>
+  <ent stime="old" type="mod" id="e14">
+    <parts>
+      <part ew="w1094" sw="w1094">old</part>
+    </parts>
+  </ent>
+  <ent type="ischaemic_stroke" id="e15">
+    <parts>
+      <part ew="w1098" sw="w1098">infarcts</part>
+    </parts>
+  </ent>
+  <ent neg="yes" stime="recent" type="mod" id="e16">
+    <attribute name="negated"/><parts>
+      <part ew="w1130" sw="w1130">acute</part>
+    </parts>
+  </ent>
+</ents>
+</standoff>
+</document>

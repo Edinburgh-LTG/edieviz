@@ -1,0 +1,69 @@
+#!/bin/sh
+
+if [ "x$1" = "x-help" ]; then
+  cat >&2 <<END
+
+usage: $usage
+
+END
+  echo "$descr" | fmt
+  exit 0
+fi
+
+here=`dirname $0`
+here=`cd $here/..; pwd`
+
+if [ -z "$LXPATH" ]; then
+
+ case `uname -srm` in
+  Linux*i?86)
+    bin=$here/bin/sys-i386-sl5
+	SED="sed -r"
+    ;;
+  Darwin?9*i386)
+    bin=$here/bin/sys-i386-leopard
+	SED="sed -E"
+    ;;
+  Darwin?1[012345]*)
+    bin=$here/bin/sys-i386-snow-leopard
+	SED="sed -E"
+    ;;
+  Darwin?1[6789]*)
+    bin=$here/bin/sys-x86-64-sierra
+	SED="sed -E"
+    ;;
+  Linux*x86_64*)
+    bin=$here/bin/sys-x86-64-el7
+	SED="sed -r"
+    ;;
+  Linux*unknown)
+    bin=$here/bin/sys-i386-sl5
+	SED="sed -r"
+    ;;
+  *)
+    echo "unrecognised platform `uname -srm`" >&2
+    echo "edit scripts/setup, or set LXPATH to appropriate path" >&2
+    exit 1
+ esac
+
+ export PATH=$bin:/bin:/usr/bin
+ export LANG=C
+
+
+else
+
+ export PATH="$LXPATH"
+ # We don't use this any more, I think
+ SED="SED-not-set"
+
+fi
+
+tmp=/tmp/$USER-`basename $0`-$$
+
+# make scripts exit when any error occurs
+
+set -e
+
+if [ -z "$LXDEBUG" ]; then
+  trap "rm -f $tmp-*" 0 1 2
+fi

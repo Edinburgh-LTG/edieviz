@@ -1,0 +1,115 @@
+#!/bin/sh
+
+usage="run-edier -t type <input >output"
+
+descr="Run all the components over a document. Type is xml if processing the example files, plain otherwise."
+
+. `dirname $0`/setup
+
+while [ $# -gt 0 ]; do
+  arg=$1
+  shift
+  case $arg in
+    -t)
+      type=$1
+      shift
+      ;;
+    *)
+      echo "usage: $usage" >&2
+      exit 2
+  esac
+done
+
+if [ $# -ne -0 -o -z "$type" ]; then
+  echo "usage: $usage" >&2
+  exit 2
+fi
+
+cat >$tmp-input
+
+if [ $type = xml ]; then
+
+# prepare and zone document
+
+$here/scripts/prepare-scan <$tmp-input >$tmp-prepared
+
+cat $tmp-prepared |
+lxtransduce -q text $here/lib/zone/zone.gr |
+lxt -s $here/lib/zone/makeheader.xsl >$tmp-zoned
+
+fi
+
+if [ $type = plain ]; then
+
+# prepare document
+
+(echo '<record>' ; cat $tmp-input ; echo '</record>') |
+$here/scripts/prepare-scan >$tmp-prepared
+
+cat $tmp-prepared |
+lxt -s $here/lib/zone/makeheader.xsl >$tmp-zoned
+
+fi
+
+# tokenise
+
+cat $tmp-zoned |
+$here/scripts/tokenise |
+lxreplace -q s -t "<s>&attrs;<xsl:attribute name='proc'>yes</xsl:attribute>&children;</s>" >$tmp-tokenised
+
+# POS tag
+
+cat $tmp-tokenised |
+$here/scripts/postag -m $here/models/pos |
+$here/scripts/geniatag -m $here/models/genia |
+lxt -s $here/lib/postag/correctpos1.xsl |
+lxt -s $here/lib/postag/correctpos2.xsl >$tmp-postagged
+
+# lemmatise
+
+$here/scripts/lemmatise <$tmp-postagged >$tmp-lemmatised
+
+# NER (lexlookup)
+
+cat $tmp-lemmatised |
+$here/scripts/numtimex >$tmp-numtimex
+
+$here/scripts/scanlexlookup <$tmp-numtimex >$tmp-nertagged
+
+# chunk
+
+cat $tmp-nertagged |
+$here/scripts/chunk -s brain -f inline |
+lxt -s $here/lib/chunk/propagatescan.xsl |
+lxtransduce -q s $here/lib/chunk/complexng.gr |
+lxt -s $here/lib/chunk/propagatescan2.xsl |
+lxtransduce -r -q "ng|vg|ag" $here/lib/chunk/ent.gr |
+lxtransduce -q "ent[@type]" -a modb $here/lib/chunk/ent.gr >$tmp-chunked
+
+# relations
+
+cat $tmp-chunked |
+lxt -s $here/lib/chunk/propagateneg.xsl |
+lxtransduce -q "s[@proc='yes']" $here/lib/reln/negrel.gr |
+lxt -s $here/lib/reln/adjustng.xsl |
+lxreplace -q "ag[@type]" -t "<ng>&attrs;&children;</ng>" |
+lxreplace -q "ng[not(@type)]" -t "&children;" |
+lxreplace -q "ag|rg|sg|pg|vg" |
+lxt -s $here/lib/reln/ents.xsl |
+lxaddids -e "ent" -p "'e'" |
+lxtransduce -q "s[@proc='yes']" $here/lib/reln/locreln.gr |
+lxt -s $here/lib/reln/standoff-reln.xsl |
+lxtransduce -q "s[@proc='yes']" $here/lib/reln/timereln.gr |
+lxt -s $here/lib/reln/standoff-reln.xsl |
+lxt -s $here/lib/reln/standoff-nglocrel.xsl |
+lxt -s $here/lib/reln/standoff-ngtimerel.xsl | 
+lxaddids -e relation -p "'r'" >$tmp-reln
+
+# label
+
+cat $tmp-reln |
+lxt -s $here/lib/label/label.xsl |
+lxt -s $here/lib/label/standoff-ent.xsl |
+lxreplace -q "ng" >$tmp-out
+
+cat $tmp-out

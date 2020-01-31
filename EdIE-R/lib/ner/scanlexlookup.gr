@@ -1,0 +1,476 @@
+<rules name="lexlookup" type="xml" apply="all">
+
+<lexicon name="class" href="class.lex"/>
+<lexicon name="mod" href="mod.lex"/>
+
+<rule name="type-phr-noattr">
+  <lookup lexicon="class" match="w" phrase="true">
+    <var name="cat" value="cat"/>
+    <constraint test="@word~' '"/>
+  </lookup>
+</rule>
+
+<rule name="type-lemma-noattr">
+  <first>
+    <query match="w[@l]">
+      <constraint test="class(@l)"/>
+      <var name="cat" value="string(class(@l)/cat)"/> 
+    </query>
+    <query match="w[@l]">
+      <constraint test="class()"/>
+      <var name="cat" value="string(class()/cat)"/> 
+    </query>
+  </first>
+</rule>
+
+<rule name="type-word-noattr">
+  <lookup lexicon="class" match="w" phrase="true">
+    <var name="cat" value="cat"/>
+  </lookup>
+</rule>
+
+<rule name="type-phr" attrs="type='$cat' multi='yes'">
+  <lookup lexicon="class" match="w" phrase="true">
+    <var name="cat" value="cat"/>
+    <constraint test="@word~' '"/>
+  </lookup>
+</rule>
+
+<rule name="type-lemma" attrs="type='$cat' multi='no'">
+  <first>
+    <query match="w[@l]">
+      <constraint test="class(@l)"/>
+      <var name="cat" value="string(class(@l)/cat)"/> 
+    </query>
+    <query match="w[@l]">
+      <constraint test="class()"/>
+      <var name="cat" value="string(class()/cat)"/> 
+    </query>
+  </first>
+</rule>
+
+<rule name="type-word" attrs="type='$cat' multi='no'">
+  <lookup lexicon="class" match="w" phrase="true">
+    <var name="cat" value="cat"/>
+  </lookup>
+</rule>
+
+<rule name="svd1">
+  <seq attrs="type='small_vessel_disease' multi='yes'">
+    <first mult="+">
+     <seq>    
+        <query match="w[.~'^[Ww]hite$']"/>
+        <query match="w[.='matter']"/>
+        <query match="w[.~'^([Ll]ow|[Rr]educed)$']" mult="?"/>
+      </seq>
+      <seq>    
+        <query match="w[.~'^[Pp]eri$']"/>
+        <query match="w[.='-']" mult="?"/>
+        <query match="w[.='ventricular']"/>
+        <seq mult="?">
+          <query match="w[.~'^area(s)?$']"/>
+          <query match="w[.='of']"/>
+        </seq>
+        <query match="w[.~'^([Ll]ow|[Rr]educed)$']" mult="?"/>
+      </seq>
+      <seq>    
+      <query match="w" mult="?"/>
+        <query match="w[.~'^[Hh]ypo$']"/>
+        <query match="w[.='-']" mult="?"/>
+      </seq>
+      <seq>
+        <query match="w[.~'^[Pp]eri(-)?vent.*r$']"/>
+        <seq mult="?">
+          <query match="w[.~'^area(s)?$']"/>
+          <query match="w[.='of']"/>
+        </seq>
+        <query match="w[.~'^([Ll]ow|[Rr]educed)$']" mult="?"/>
+      </seq>
+    </first>
+    <seq>
+      <query match="w[not(.~'attenuat') and not(.~'parenchym')]" mult="?"/>
+      <query match="w[.~'attenuat']"/>
+      <query match="w[.~'^change(s)?$']" mult="?"/>
+    </seq>
+  </seq>
+</rule>
+
+<rule name="svd2">
+  <seq attrs="type='small_vessel_disease' multi='yes'" mult="+">
+    <seq>
+      <query match="w[.~'^[Ll]ow$' or '^[Hh]ypo$']" mult="?"/>
+      <query match="w[.='-']" mult="?"/>
+      <query match="w[.~'attenuation']"/>
+      <query match="w[.~'^change(s)?$']" mult="?"/>
+    </seq>
+    <query match="w[.='of' or .='in']"/>
+    <query match="w[.='the']" mult="?"/>
+    <first>
+      <seq>    
+        <query match="w[.='peri']"/>
+        <query match="w[.='-']" mult="?"/>
+        <query match="w[.='ventricular']"/>
+      </seq>
+      <query match="w[.='periventricular']"/>
+      <query match="w[.='perventricular']"/>
+      <query match="w[.='peri-ventricular']"/>
+      <query match="w[.='deep']"/>
+      <query match="w[.='subcortical']"/>
+      <query match="w[.~'^[Pp]eri(-)?vent.*r$']"/>
+    </first>
+    <seq>    
+      <query match="w[not(.='white')]" mult="?"/>
+      <query match="w[.='white']"/>
+      <query match="w[.='matter']"/>
+    </seq>
+  </seq>
+</rule>
+
+<!-- this makes lots of entries in class.lex redundant - consider removing them -->
+<rule name="svd3">
+  <seq attrs="type='small_vessel_disease' multi='yes'" mult="+">
+    <first mult="+">
+      <seq>
+        <query match="w[.~'^[Ll]ow$' or '^[Hh]ypo$']"/>
+        <query match="w[.='-']" mult="?"/>
+        <query match="w[.~'^attenuat']"/>
+      </seq>
+      <seq>    
+        <query match="w[.='peri']"/>
+        <query match="w[.='-']" mult="?"/>
+        <query match="w[.='ventricular']"/>
+      </seq>
+      <query match="w[.='periventricular']"/>
+      <query match="w[.='peri-ventricular']"/>
+      <query match="w[.~'^[Pp]eri(-)?vent.*r$']"/>
+      <seq>    
+        <first>
+          <seq>
+            <query match="w[.~'^(small|smaller)$']"/>
+            <query match="w[.='vessel']"/>
+          </seq>
+          <seq>
+            <query match="w[.='micro']"/>
+            <query match="w[.='-']" mult="?"/>
+            <query match="w[.='vascular']"/>
+          </seq>
+          <query match="w[.='microvascular']"/>
+          <query match="w[.='micro-vascular']"/>
+        </first>
+        <seq mult="?">
+          <query match="w[.='white']"/>
+          <query match="w[.='matter']"/>
+        </seq>
+      </seq>
+      <seq>
+        <query match="w[.='white']"/>
+        <query match="w[.='matter']"/>
+      </seq>
+    </first>
+    <query match="w[.~'^(ischaemic|ischemic)$']" mult="?"/>
+    <query match="w[.~'^(chronic)$']" mult="?"/>
+    <query match="w[.~'^(change(s)?|damage)$']"/>
+  </seq>
+</rule>
+
+<rule name="svd4">
+  <seq attrs="type='small_vessel_disease' multi='yes'">
+    <first>
+      <seq>
+        <query match="w[.='age' or .='Age']"/>
+        <query match="w[.='-']" mult="?"/>
+        <query match="w[.='related']"/>
+      </seq>
+      <seq>
+        <query match="w[.='multi']"/>
+        <query match="w[.='-']" mult="?"/>
+        <query match="w[.='focal']"/>
+      </seq>
+      <query match="w[.='multifocal' or .='multi-focal']"/>
+    </first>
+    <query match="w[.~'^(ischaemic|ischemic)$']"/>
+    <query match="w[.~'^(change(s)?|damage)$']"/>
+  </seq>
+</rule>
+
+<rule name="subhaem1">
+  <seq attrs="type='subdural_haematoma' multi='yes'">
+    <seq>    
+      <query match="w[.='intra' or .='intra-']"/>
+      <query match="w[.='-']" mult="?"/>
+    </seq>
+    <query match="w[.='or' or .='nor']"/>
+    <first>
+      <query match="w[.~'^extra(-)?axial']"/>
+      <seq>    
+        <query match="w[.='extra' or .='extra-']"/>
+        <query match="w[.='-']" mult="?"/>
+        <query match="w[.='axial']"/>
+      </seq>
+    </first>
+    <query match="w[.~'^collection']"/>
+  </seq>
+</rule>
+
+<rule name="subhaem2">
+  <seq attrs="type='subdural_haematoma' multi='no'">
+    <query match="w[.~'^collection(s)?$' and preceding-sibling::w[.~'^[Nn]o$']]"/>
+  </seq>
+</rule>
+
+<rule name="subhaem3">
+  <seq attrs="type='subdural_haematoma' multi='yes'">
+    <first>
+      <query match="w[.~'^[Ss]ubdural$']"/>
+      <query match="w[.~'^[Ss]ub-dural$']"/>
+      <seq>
+        <query match="w[.~'^[Ss]ub$']"/>
+        <query match="w[.='-']" mult="?"/>
+        <query match="w[.~'^dural$']"/>
+      </seq>
+    </first>
+    <query match="w[.='fluid']" mult="?"/>
+    <query match="w[.~'^(collection|haematoma|hematoma|haemorrhage|hemorrhage)(s)?$' or .~'^(blood|bleed|haematomata)$']"/>
+  </seq>
+</rule>
+
+<rule name="subhaem4">
+  <seq attrs="type='subdural_haematoma' multi='no'">
+    <query match="w[.~'^[Ss](ub-dural|ubdural)(s)?$']"/>
+    <first suppress="true">
+      <query match="w[not(@p~'^N') and not(@g~'^N') and not(.~'^(space|drain|drains|air|hygroma|empyema)$')]"/>
+      <query match="w[.~'^[A-Z][A-Z]+$']"/>
+    </first>
+  </seq>
+</rule>
+
+<rule name="subhaem5">
+  <seq attrs="type='subdural_haematoma' multi='yes'">
+    <query match="w[.~'^[Ss]ub$']"/>
+    <query match="w[.='-']" mult="?"/>
+    <query match="w[.~'^dural(s)?$']"/>
+    <query match="w[not(@p~'^N') and not(@g~'^N') and not(.~'^(space|drain|drains|air)$')]" suppress="true"/>
+  </seq>
+</rule>
+
+<rule name="haemstroke1">
+  <seq attrs="type='haemorrhagic_stroke' multi='no'">
+    <query match="w[.~'^bleeding(s)?$' and preceding-sibling::w[.~'^[Nn]o$']]"/>
+  </seq>
+</rule>
+
+<rule name="haemstroke2">
+  <seq attrs="type='haemorrhagic_stroke' multi='no'">
+    <query match="w[.~'^bleed(s)?$' and not(@p~'^V')]"/>
+  </seq>
+</rule>
+
+<rule name="haemtrans1">
+  <seq attrs="type='haemorrhagic_transformation' multi='yes'">
+    <query match="w[.~'^[Hh][a]?emorrhag(e|ic)$']"/>
+    <query match="w[@p~'^[^V]' and .~'[a-z]' and not(.~'^infarct') and not(.~'^(,|and|or)$')]" mult="+"/>
+    <query match="w[.~'^infarct']"/>
+  </seq>
+</rule>
+
+<rule name="atrophy1">
+  <seq attrs="type='atrophy' multi='yes'">
+    <query match="w[.~'^([Gg]eneralised|[Mm]oderate|[Dd]iffuse|[Cc]entral|[Gg]lobal)$']"/>
+    <query match="w[.~'cerebral']" mult="?"/>
+    <first>
+      <seq>
+        <query match="w[.='volume']"/>
+        <query match="w[.='loss']"/>
+      </seq>
+      <seq>
+        <query match="w[.='loss']"/>
+        <query match="w[.='of']"/>
+        <query match="w[.='brain']"/>
+        <query match="w[.='volume']"/>
+      </seq>
+      <seq>
+        <query match="w[.='involutionary']"/>
+        <query match="w[.='change']"/>
+      </seq>
+      <query match="w[.='involution']"/>
+    </first>
+  </seq>
+</rule>
+
+<rule name="atrophy2">
+  <seq attrs="type='atrophy' multi='yes'">
+    <query match="w[.='age' or .='Age']"/>
+    <query match="w[.='-']" mult="?"/>
+    <query match="w[.='related' or .='appropriate']"/>
+    <query match="w[.~'cerebral']" mult="?"/>
+    <query match="w[.='volume']"/>
+    <query match="w[.='loss']"/>
+  </seq>
+</rule>
+
+<rule name="block">
+  <first>
+    <seq>
+      <query match="w[.~'^([Hh][a]?ematoma|[Hh][a]?emorrhage)' and ancestor::s[.~'^(Soft|soft|tissue|Scalp|scalp|gallial|galeal|forehead|bruise|bruising|mastoid|ear)$']]"/>
+    </seq>
+    <seq>
+      <query match="w[.='mass']"/>
+      <query match="w[.='effect']"/>
+    </seq>
+    <seq><!-- to block non haemorrhagic infarct -->
+      <query match="w[.='non']"/>
+      <query match="w[.='haemorrhagic']"/>
+    </seq>
+    <seq><!-- to block extradural haemorrhage etc -->
+      <query match="w[.~'^(extradural|extra-dural|extraaxial|extra-axial)$']"/>
+      <query match="w[not(.~'^(haemorrhage|hemorrhage|haematoma|hematoma|,|or|and|subdural)')]" mult="*"/>
+      <query match="w[.~'^(haemorrhage|hemorrhage|haematoma|hematoma)']"/>
+    </seq>
+    <!-- to block extra dural haemorrhage etc -->
+    <seq>
+      <query match="w[.~'^([Ee]xtra)$']"/>
+      <query match="w[.='-']" mult="?"/>
+      <query match="w[.~'^(dural|axial)']"/>
+      <query match="w[not(.~'^(haemorrhage|hemorrhage|haematoma|hematoma|,|or|and|subdural)')]" mult="*"/>
+      <query match="w[.~'^(haemorrhage|hemorrhage|haematoma|hematoma)']"/>
+    </seq>
+    <!-- to block extradural haemorrhagic density etc -->
+    <seq>
+      <query match="w[.~'^(extradural|extra-dural|extraaxial|extra-axial)$']"/>
+      <query match="w[not(.~'^(haemorrhagic|hemorrhagic)$')]" mult="?"/>
+      <query match="w[not(.~'^(haemorrhagic|hemorrhagic)$')]" mult="?"/>
+      <query match="w[.~'^(haemorrhagic|hemorrhagic)$']"/>
+      <query match="w[.='density']"/>
+    </seq>
+    <!-- to block extra dural haemorrhagic density etc -->
+    <seq>
+      <query match="w[.~'^([Ee]xtra)$']"/>
+      <query match="w[.='-']" mult="?"/>
+      <query match="w[.~'^(dural|axial)']"/>
+      <query match="w[not(.~'^(haemorrhagic|hemorrhagic)$')]" mult="?"/>
+      <query match="w[not(.~'^(haemorrhagic|hemorrhagic)$')]" mult="?"/>
+      <query match="w[.~'^(haemorrhagic|hemorrhagic)$']"/>
+      <query match="w[.='density']"/>
+    </seq>
+    <seq>
+      <query match="w[.='pituitary']"/>
+      <query match="w[not(.~'oma$')]"/>
+      <seq mult="?">
+        <query match="w[.='or' or .='and']"/>
+        <query match="w"/>
+      </seq>
+    </seq>
+  </first>
+</rule>
+
+<rule name="typewords">
+  <first>
+    <ref name="block"/>
+    <ref name="svd1"/>
+    <ref name="svd2"/>
+    <ref name="svd3"/>
+    <ref name="svd4"/>
+    <ref name="subhaem1"/>
+    <ref name="subhaem2"/>
+    <ref name="subhaem3"/>
+    <ref name="subhaem4"/>
+    <ref name="subhaem5"/>
+    <ref name="haemtrans1"/>
+    <ref name="haemstroke1"/>
+    <ref name="haemstroke2"/>
+    <ref name="atrophy1"/>
+    <ref name="atrophy2"/>
+    <ref name="type-phr"/>
+    <ref name="type-lemma"/>
+    <ref name="type-word"/>
+  </first>
+</rule>
+
+<!-- compared with previous CT -->
+<rule name="blocktime">
+  <first>
+    <query match="w[.~'^(previous|old)$' and preceding-sibling::w[.~'ompar'] and not(following-sibling::w[@type='ischaemic_stroke'])]"/>
+    <query match="w[.~'^(previous|prior)$' and following-sibling::w[1][.~'^(CT|MR|scan)$']]"/>
+    <query match="w[.='early' and not(following-sibling::w[@type='ischaemic_stroke'])]"/>
+    <query match="w[.~'^[Rr]esolving$' and not(following-sibling::w[@type='haemorrhagic_stroke'])]"/>
+    <query match="w[.='prior' and following-sibling::w[1][.='to']]"/>
+    <query match="w[.='prior' and preceding-sibling::w[1][.~'^(to|since|[Nn]o)$']]"/>
+    <query match="w[.='previous' and preceding-sibling::w[2][.='new'] and preceding-sibling::w[1][.='from']]"/>
+  </first>
+</rule>
+
+<rule name="timewords" attrs="stime='$time'">
+  <first>
+    <query match="w[@l]">
+      <constraint test="mod(@l) and mod(@l)/time"/>
+      <var name="time" value="string(mod(@l)/time)"/> 
+    </query>
+    <lookup lexicon="mod" match="w" phrase="true">
+      <constraint test="time"/>
+      <var name="time" value="time"/>
+    </lookup>
+  </first>
+</rule>
+
+<!-- background as JJ not as NN -->
+<rule name="timeadjs" attrs="stime='$time'">
+  <lookup lexicon="mod" match="w[@p='JJ']" phrase="true">
+    <constraint test="timejj"/>
+    <var name="time" value="timejj"/>
+  </lookup>
+</rule>
+
+<!-- deep in deep white matter, intracerebral in intracerebral haemorrhage -->
+<rule name="blockloc">
+  <first>
+    <seq>
+      <query match="w[.~'^[Dd]eep$']"/>
+      <query match="w[.='white']"/>
+      <query match="w[.='matter']"/>
+    </seq>
+    <seq>
+      <first>
+        <query match="w[.~'^[Ii]ntra[-]?cerebral$']"/>
+        <seq>
+          <query match="w[.~'^[Ii]ntra$']"/>
+          <query match="w[.='-']" mult="?"/>
+          <query match="w[.='cerebral']"/>
+        </seq>
+      </first>
+      <query match="w[.~'^(h[a]?emorrhage|h[a]?ematoma[s]?)$']"/>
+    </seq>
+  </first>
+</rule>
+
+<rule name="locwords" attrs="sloc='$loc'">
+  <first>
+    <query match="w[@l]">
+      <constraint test="mod(@l) and mod(@l)/loc"/>
+      <var name="loc" value="string(mod(@l)/loc)"/> 
+    </query>
+    <lookup lexicon="mod" match="w" phrase="true">
+      <constraint test="loc"/>
+      <var name="loc" value="loc"/>
+    </lookup>
+  </first>
+</rule>
+
+<rule name="timeandloc">
+  <first>
+    <ref name="blocktime"/>
+    <ref name="timeadjs"/>
+    <ref name="timewords"/>
+    <ref name="blockloc"/>
+    <ref name="locwords"/>
+  </first>
+</rule>
+
+<rule name="all">
+  <first>
+    <ref name="timeandloc"/>
+  </first>
+</rule>
+
+</rules>
+
+

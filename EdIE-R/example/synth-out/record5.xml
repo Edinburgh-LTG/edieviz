@@ -1,0 +1,113 @@
+<document id="0001">
+<meta>
+<attr name="type">CT</attr>
+<attr name="order_item">CT Head With Contrast</attr>
+<header>Report 0001: CT (CT Head With Contrast)</header>
+<labels>
+<l id="1">Ischaemic stroke, deep, recent</l>
+<l id="2">Ischaemic stroke, deep, old</l>
+<l id="3">Ischaemic stroke, cortical, recent</l>
+<l id="4">Ischaemic stroke, cortical, old</l>
+<l id="5">Ischaemic stroke, underspecified</l>
+<l id="6">Haemorrhagic stroke, deep, recent</l>
+<l id="7">Haemorrhagic stroke, deep, old</l>
+<l id="8">Haemorrhagic stroke, lobar, recent</l>
+<l id="9">Haemorrhagic stroke, lobar, old</l>
+<l id="10" choice="pos">Haemorrhagic stroke, underspecified</l>
+<l id="11">Stroke, underspecified</l>
+<l id="12">Tumour, meningioma</l>
+<l id="13">Tumour, metastasis</l>
+<l id="14">Tumour, glioma</l>
+<l id="15">Tumour, other</l>
+<l id="16">Small vessel disease</l>
+<l id="17">Atrophy</l>
+<l id="18">Subdural haematoma</l>
+<l id="19">Subarachnoid haemorrhage, aneurysmal</l>
+<l id="20">Subarachnoid haemorrhage, other</l>
+<l id="21">Microbleed, deep</l>
+<l id="22">Microbleed, lobar</l>
+<l id="23">Microbleed, underspecified</l>
+<l id="24">Haemorrhagic transformation</l>
+</labels>
+</meta>
+<text>
+<cdetails><p><s proc="yes" id="s1"><w g="JJ" id="w695" pws="yes" p="JJ">Clinical</w> <w headn="yes" g="NNS" id="w704" pws="yes" p="NNS" l="detail">Details</w></s></p></cdetails>
+
+<report><p><s proc="yes" id="s2"><w headn="yes" g="NN" id="w713" pws="yes" p="NN" l="report">Report</w></s></p>
+
+<p><s proc="yes" id="s3"><w headn="yes" g="NN" id="w721" pws="yes" p="NN" l="ct">CT</w> <w headn="yes" g="NN" id="w724" pws="yes" p="NN" l="head">HEAD</w> <w headn="yes" g="NN" id="w729" pws="yes" p="NN" l="with">WITH</w> <w headn="yes" g="NN" id="w734" pws="yes" p="NN" l="contrast">CONTRAST</w><w g=":" id="w742" pws="no" p=":">:</w></s></p>
+
+<p><s proc="yes" id="s4"><w headn="yes" g="NN" id="w745" pws="yes" p="NN" l="comparison">Comparison</w> <w headv="yes" g="VBD" id="w756" pws="yes" p="VBD" l="make">made</w> <w g="IN" id="w761" pws="yes" p="IN">with</w> <w g="DT" id="w766" pws="yes" p="DT">the</w> <w g="JJ" id="w770" pws="yes" p="JJ">previous</w> <w headn="yes" g="NN" id="w779" pws="yes" p="NN" l="study">study</w><w g="." id="w784" pws="no" sb="true" p=".">.</w></s></p>
+
+<p><s proc="yes" id="s5"><w g="DT" id="w787" pws="yes" p="DT">The</w> <ent type="haemorrhagic_stroke" id="e1"><w headn="yes" multi="no" type="haemorrhagic_stroke" g="NN" id="w791" pws="yes" p="NN" l="haematoma">haematoma</w></ent> <w g="IN" id="w801" pws="yes" p="IN">in</w> <w g="DT" id="w804" pws="yes" p="DT">the</w> <w g="JJ" id="w808" pws="yes" p="JJ">left</w> <ent sloc="cortical" type="mod" id="e2"><w sloc="cortical" g="JJ" id="w813" pws="yes" p="JJ">fronto-parietal</w></ent> <w headn="yes" g="NN" id="w829" pws="yes" p="NN" l="region">region</w> <w headv="yes" g="VBZ" id="w836" pws="yes" p="VBZ" l="appear">appears</w> <w g="JJR" id="w844" pws="yes" p="JJR">smaller</w><w g="." id="w851" pws="no" sb="true" p=".">.</w></s> <s proc="yes" id="s6"><w headn="yes" g="EX" id="w853" pws="yes" p="EX">There</w> <w headv="yes" g="VBZ" id="w859" pws="yes" p="VBZ" l="be">is</w> <w g="RB" id="w862" pws="yes" p="RB">still</w> <w g="DT" id="w868" pws="yes" p="DT">a</w> <w g="JJ" id="w870" pws="yes" p="JJ">considerable</w> <w headn="yes" g="NN" id="w883" pws="yes" p="NN" l="volume">volume</w> <w g="IN" id="w890" pws="yes" p="IN">of</w> <w g="JJ" id="w893" pws="yes" p="JJ">fresh</w> <w headn="yes" g="NN" id="w899" pws="yes" p="NN" l="blood">blood</w> <w g="CC" id="w905" pws="yes" p="CC">and</w> <w headv="yes" g="NN" id="w909" pws="yes" p="VBG" l="surround">surrounding</w> <w headn="yes" g="NN" id="w921" pws="yes" p="NN" l="oedema">oedema</w><w g="." id="w927" pws="no" sb="true" p=".">.</w></s>  <s proc="yes" id="s7"><w g="DT" id="w930" pws="yes" p="DT">The</w> <w headn="yes" g="NN" id="w934" pws="yes" p="NN" l="degree">degree</w> <w g="IN" id="w941" pws="yes" p="IN">of</w> <w headn="yes" g="NN" id="w944" pws="yes" p="NN" l="mass">mass</w> <w headn="yes" g="NN" id="w949" pws="yes" p="NN" l="effect">effect</w> <w g="VBZ" id="w956" pws="yes" p="VBZ" l="have">has</w> <w headv="yes" g="VBN" id="w960" pws="yes" p="VBN" l="decrease">decreased</w> <w headv="yes" g="VBN" id="w970" pws="yes" p="VBN" l="compare">compared</w> <w g="TO" id="w979" pws="yes" p="TO">to</w> <w g="JJ" id="w982" pws="yes" p="JJ">previous</w> <w headn="yes" g="NN" id="w991" pws="yes" p="NN" l="scan">scan</w><w g="." id="w995" pws="no" sb="true" p=".">.</w></s>  <s proc="yes" id="s8"><w headn="yes" g="NN" id="w998" pws="yes" p="NN" l="blood">Blood</w> <w g="RB" id="w1004" pws="yes" p="RB">no</w> <w g="RBR" id="w1007" pws="yes" p="RBR">longer</w> <w g="JJ" id="w1014" pws="yes" p="JJ">visible</w> <w g="IN" id="w1022" pws="yes" p="IN">within</w> <w g="DT" id="w1029" pws="yes" p="DT">the</w> <w headn="yes" g="NNS" id="w1033" pws="yes" p="NNS" l="ventricle">ventricles</w><w g="." id="w1043" pws="no" sb="true" p=".">.</w></s>  <s proc="yes" id="s9"><w g="DT" id="w1046" pws="yes" p="DT">The</w> <w g="JJ" id="w1050" pws="yes" p="JJ" l="right-sided" vstem="right-side">right-sided</w> <ent type="haemorrhagic_stroke" id="e3"><w headn="yes" multi="no" type="haemorrhagic_stroke" g="NN" id="w1062" pws="yes" p="NN" l="haematoma">haematoma</w></ent> <w headv="yes" g="VBZ" id="w1072" pws="yes" p="VBZ" l="be">is</w> <w g="RB" id="w1075" pws="yes" p="RB">no</w> <w g="JJR" id="w1078" pws="yes" p="RBR">longer</w> <w g="NN" id="w1085" pws="yes" p="JJ">visible</w><w g="." id="w1092" pws="no" sb="true" p=".">.</w></s></p>
+
+<p><s proc="yes" id="s10"><w headn="yes" g="EX" id="w1095" pws="yes" p="EX">There</w> <w headv="yes" g="VBP" id="w1101" pws="yes" p="VBP" l="be">are</w> <w quty="2" g="CD" id="w1105" pws="yes" p="CD">two</w> <ent sloc="cortical" type="mod" id="e4"><w headn="yes" sloc="cortical" g="NN" id="w1109" pws="yes" p="NN" l="mca">MCA</w></ent> <w headn="yes" g="NNS" id="w1113" pws="yes" p="NNS" l="aneurysm">aneurysms</w> <w headn="yes" g="WDT" id="w1123" pws="yes" p="WDT">which</w> <w headn="yes" g="NN" id="w1129" pws="yes" p="NN" l="measure">measure</w> <w headn="yes" g="NN" id="w1137" pws="yes" p="CD">7mm</w> <w g="IN" id="w1141" pws="yes" p="IN">on</w> <w g="DT" id="w1144" pws="yes" p="DT">the</w> <w prevtag="JJ" headn="yes" g="NN" id="w1148" pws="yes" p="NN">left</w> <w g="CC" id="w1153" pws="yes" p="CC">and</w> <w headn="yes" g="NN" id="w1157" pws="yes" p="NN" l="8mm">8mm</w> <w g="IN" id="w1161" pws="yes" p="IN">on</w> <w g="DT" id="w1164" pws="yes" p="DT">the</w> <w prevtag="JJ" headn="yes" g="NN" id="w1168" pws="yes" p="NN">right</w><w g="." id="w1173" pws="no" sb="true" p=".">.</w></s> <s proc="yes" id="s11"><w g="DT" id="w1175" pws="yes" p="DT">No</w> <w g="JJ" id="w1178" pws="yes" p="JJ">visible</w> <w g="JJ" id="w1186" pws="yes" p="JJ" l="surrounding" vstem="surround">surrounding</w> <w headn="yes" g="NN" id="w1198" pws="yes" p="NN" l="blood">blood</w><w g="." id="w1203" pws="no" sb="true" p=".">.</w></s></p>
+
+<p><s proc="yes" id="s12"><w g="DT" id="w1206" pws="yes" p="DT">No</w> <w g="JJ" id="w1209" pws="yes" p="JJ" l="ring-enhancing" vstem="ring-enhance">ring-enhancing</w> <w headn="yes" g="NNS" id="w1224" pws="yes" p="NNS" l="lesion">lesions</w> <w headv="yes" g="VBN" id="w1232" pws="yes" p="VBN" l="see">seen</w><w g="." id="w1236" pws="no" sb="true" p=".">.</w></s></p></report>
+
+<conclusion><p><s proc="yes" id="s13"><w headn="yes" g="NN" id="w1239" pws="yes" p="NN" l="opinion">Opinion</w></s></p>
+
+<p><s proc="yes" id="s14"><w g="JJ" id="w1248" pws="yes" p="JJ">Bilateral</w> <ent sloc="cortical" type="mod" id="e5"><w headn="yes" sloc="cortical" g="NN" id="w1258" pws="yes" p="NN" l="mca">MCA</w></ent> <w headn="yes" g="NNS" id="w1262" pws="yes" p="NNS" l="aneurysm">aneurysms</w><w g="." id="w1271" pws="no" sb="true" p=".">.</w></s></p>
+
+<p><s proc="yes" id="s15"><ent stime="old" type="mod" id="e6"><w headn="yes" stime="old" g="VBG" id="w1274" pws="yes" p="VBG" l="resolve">Resolving</w></ent> <w g="JJ" id="w1284" pws="yes" p="JJ">left</w> <w g="NN" id="w1289" pws="yes" p="JJ">intra</w> <w g="JJ" id="w1295" pws="yes" p="JJ">axial</w> <ent type="haemorrhagic_stroke" id="e7"><w headn="yes" multi="no" type="haemorrhagic_stroke" g="NN" id="w1301" pws="yes" p="NN" l="haematoma">haematoma</w></ent><w g="." id="w1310" pws="no" sb="true" p=".">.</w></s></p>
+
+<p><s proc="yes" id="s16"><w g="DT" id="w1313" pws="yes" p="DT">No</w> <w headn="yes" g="NN" id="w1316" pws="yes" p="NN" l="evidence">evidence</w> <w g="IN" id="w1325" pws="yes" p="IN">of</w> <ent neg="yes" type="metast_tumour" id="e8"><w multi="no" type="metast_tumour" g="JJ" id="w1328" pws="yes" p="JJ">metastatic</w></ent> <w headn="yes" g="NN" id="w1339" pws="yes" p="NN" l="disease">disease</w> <w headv="yes" g="VBN" id="w1347" pws="yes" p="VBD" l="note">noted</w><w g="." id="w1352" pws="no" sb="true" p=".">.</w></s></p></conclusion>
+
+
+</text>
+<standoff>
+<relations>
+  <relation id="r1" type="loc">
+    <argument arg1="true" ref="e1" text="haematoma"/>
+    <argument arg2="true" ref="e2" text="fronto-parietal"/>
+  </relation>
+<relation id="r2" type="time">
+    <argument arg1="true" ref="e7" text="haematoma"/>
+    <argument arg2="true" ref="e6" text="Resolving"/>
+  </relation>
+</relations>
+
+<ents>
+  <ent type="haemorrhagic_stroke" id="e1">
+    <parts>
+      <part ew="w791" sw="w791">haematoma</part>
+    </parts>
+  </ent>
+  <ent sloc="cortical" type="mod" id="e2">
+    <parts>
+      <part ew="w813" sw="w813">fronto-parietal</part>
+    </parts>
+  </ent>
+  <ent type="haemorrhagic_stroke" id="e3">
+    <parts>
+      <part ew="w1062" sw="w1062">haematoma</part>
+    </parts>
+  </ent>
+  <ent sloc="cortical" type="mod" id="e4">
+    <parts>
+      <part ew="w1109" sw="w1109">MCA</part>
+    </parts>
+  </ent>
+  <ent sloc="cortical" type="mod" id="e5">
+    <parts>
+      <part ew="w1258" sw="w1258">MCA</part>
+    </parts>
+  </ent>
+  <ent stime="old" type="mod" id="e6">
+    <parts>
+      <part ew="w1274" sw="w1274">Resolving</part>
+    </parts>
+  </ent>
+  <ent type="haemorrhagic_stroke" id="e7">
+    <parts>
+      <part ew="w1301" sw="w1301">haematoma</part>
+    </parts>
+  </ent>
+  <ent neg="yes" type="metast_tumour" id="e8">
+    <attribute name="negated"/><parts>
+      <part ew="w1328" sw="w1328">metastatic</part>
+    </parts>
+  </ent>
+</ents>
+</standoff>
+</document>
