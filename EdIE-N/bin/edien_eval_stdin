@@ -1,0 +1,135 @@
+#!/usr/bin/env python
+import os
+import sys
+import json
+import argparse
+import subprocess
+import torch
+from itertools import chain
+from mlconf import Blueprint
+from edien import EdIENPath
+from edien.train_utils import only_pseudorandomness_please
+from edien.data.base import Sentence
+from xml.etree import ElementTree as ET
+from edien.data.ess import EdIEDoc
+
+
+def prepare_input(text):
+    xml = """<records><record>%s</record></records>""" % text
+    return xml
+
+
+def get_edier_output(text):
+    EDIER_VAR = 'EDIER_RUN'
+    edier = os.environ[EDIER_VAR]
+    inp_str = prepare_input(text)
+
+    p = subprocess.Popen([edier, '-t', 'xml'],
+                         stdout=subprocess.PIPE,
+                         stdin=subprocess.PIPE)
+
+    (output, _) = p.communicate(input=inp_str.encode('utf-8'))
+    root = ET.fromstring(output)
+    # print(root)
+
+    documents = []
+    for doc_tag in root.iter('document'):
+        parsed_doc = EdIEDoc.from_xml(doc_tag, proc_all=True)
+        documents.append(parsed_doc)
+
+    return documents
+
+
+class InputSentence(Sentence):
+
+    @property
+    def mod_tags(self):
+        return tuple('O' for t in self.tokens)
+
+    @property
+    def ner_tags(self):
+        return tuple('O' for t in self.tokens)
+
+    @property
+    def dataset(self):
+        return 'edien.data.ess.EdIEDataset'
+
+
+bp = None
+model = None
+
+
+def annotate(text):
+    results = dict()
+
+
+    if len(text.strip()) <= 1:
+        raise ValueError('Text too short or non-existent')
+    else:
+
+        docs = get_edier_output(text)
+
+        original_sents = tuple(chain(*(doc.sentences for doc in docs)))
+
+        results['EdIE-R'] = [dict(tokens=sent.tokens,
+                                  negation=sent.negation,
+                                  ner_tags=sent.ner_tags,
+                                  mod_tags=sent.mod_tags)
+                             for sent
+                             in original_sents]
+
+        # Compute EdIE-N predictions
+        sents = bp.data.encode(original_sents, bp.paths)
+        preds = model.predict(sents)
+        preds = bp.data.decode(preds, axis=0)
+
+        results['EdIE-N'] = [dict(tokens=sent.tokens,
+                                  ner_tags=ner_tags,
+                                  mod_tags=mod_tags,
+                                  negation=negation)
+                             for sent, ner_tags, mod_tags, negation
+                             in zip(original_sents,
+                                    preds.ner_tags,
+                                    preds.mod_tags,
+                                    preds.negation)]
+        return json.dumps(results)
+
+
+def setup_model(experiment):
+    global bp, model
+    blueprint_file = os.path.join(experiment, EdIENPath.BP_FILE)
+    if not os.path.isfile(blueprint_file):
+        raise ValueError("Couldn't find blueprint file %s" % blueprint_file)
+    conf = Blueprint.from_file(blueprint_file)
+    print('Successfully loaded blueprint from %s' % blueprint_file)
+
+    conf.paths.experiment_name = conf.name
+    # Make sure we aren't trying to create vocab on dev
+    conf.data.vocab_encoder.load_if_exists = True
+    bp = conf.build()
+
+    model_path = bp.paths.model_path
+    print('Loading model from %s' % model_path)
+    model = bp.model.load(model_path)
+
+    if conf.device.startswith('cuda'):
+        # Set default gpu
+        torch.cuda.set_device(conf.device)
+        only_pseudorandomness_please(conf.seed)
+        model.cuda()
+    else:
+        only_pseudorandomness_please(conf.seed)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Dependency parser explorer')
+
+    parser.add_argument('--experiment', type=str, required=True,
+                        help='Path to folder of experiment')
+
+    args = parser.parse_args()
+
+    setup_model(args.experiment)
+    print('Done.')
+    for line in sys.stdin:
+        print(annotate(line))

@@ -27,9 +27,9 @@ export EDIEN_PATH=..
 
 ### Running the webapp
 
-You can then run:
+Assuming you followed the EdIE-N README.md instructions and downloaded the model, you can then run:
 ```bash
 python app.py --experiment ../EdIE-N/experiments/EdIE-N-v1/
 ```
 
-Then navigate to http://localhost:3000 on your browser.
+Then navigate to http://localhost:3000 in your browser.

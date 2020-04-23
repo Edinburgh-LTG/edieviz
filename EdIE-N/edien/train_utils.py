@@ -69,7 +69,7 @@ def eval_loop(y_true, y_pred, verbose=False):
     # we evaluate each output separately
     all_labels = []
     for target, preds in zip(y_pred._fields, y_pred):
-        print(target)
+        # print(target)
         gold = getattr(y_true, target)
         labels = set(gold)
         labels = tuple(sorted(labels, key=lambda x: (x[2:], x)))

@@ -131,18 +131,18 @@ class VocabEncoder(object):
             vocab = self.vocabs[attr]
             data = getattr(sents, attr)
             if data[0] is None:
-                print('%s is None, discarding' % attr)
+                # print('%s is None, discarding' % attr)
                 valid_fields.pop(valid_fields.index(attr))
             else:
                 encoded = vocab.encode(data)
                 encoded_attr.append(encoded)
                 index = 0
-                print(attr,
-                      data[index:index+1],
-                      '->',
-                      encoded[index:index+1],
-                      '->',
-                      vocab.decode(encoded[index:index+1]))
+                # print(attr,
+                #       data[index:index+1],
+                #       '->',
+                #       encoded[index:index+1],
+                #       '->',
+                #       vocab.decode(encoded[index:index+1]))
 
         nt = namedtuple('VocabEncoded', valid_fields)
         return nt(*encoded_attr)
@@ -173,7 +173,7 @@ class VocabEncoder(object):
 
             if self.load_if_exists and os.path.isfile(vocab_path):
                 vocab = v.load(vocab_path)
-                print('Found vocab for %s in file %s' % (k, vocab_path))
+                # print('Found vocab for %s in file %s' % (k, vocab_path))
             else:
                 if data is not None:
                     # Try to find attribute this belongs to
