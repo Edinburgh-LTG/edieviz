@@ -1,9 +1,12 @@
 ## EdIE-viz
 
-Herein lies the code for our demo submission:
+Herein lies the code for our paper due to appear at EMNLP LOUHI:
 >
-	Andreas Grivas, Claire Grover, Richard Tobin, Beatrice Alex
-	EdIE-Viz: A web interface for Information Extraction from Brain Radiology Reports.
+	Andreas Grivas, Beatrice Alex, Claire Grover, Richard Tobin, William Whiteley
+
+    Not a cute stroke: Analysis of Rule- and Neural Network-Based Information Extraction Systems for Brain Radiology Reports
+
+The code is currently being updated to reflect recent changes to the paper.
 
 Our webtool can be accessed online [here](http://jekyll.inf.ed.ac.uk/edieviz) and an overview of its functionality
 is available [here](http://jekyll.inf.ed.ac.uk/edieviz/about).
@@ -12,8 +15,9 @@ is available [here](http://jekyll.inf.ed.ac.uk/edieviz/about).
 
 This repository contains systems and tools for information extraction from brain radiology reports.
 
-* **EdIE-N**: Our neural network system
 * **EdIE-R**: Our rule-based system
+* **EdIE-BiLSTM**: Our neural network system with a character-aware BiLSTM sentence encoder
+* **EdIE-BERT**: Our neural network system with a BERT encoder
 * **EdIE-viz**: Contains code to run our web interface
 * **paper**: Contains scripts related to extracting results and plots
 
