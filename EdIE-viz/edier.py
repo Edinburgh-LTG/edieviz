@@ -20,11 +20,16 @@ def get_edier_output(text):
 
     (output, _) = p.communicate(input=inp_str.encode('utf-8'))
     root = ET.fromstring(output)
-    # print(root)
+
+    standoff = tuple(root.iter(EdIEDoc.XML_STANDOFF))
+    assert(len(standoff) == 1)
+    standoff = standoff[0]
+    standoff.find(EdIEDoc.XML_ST_ENTS).set('source', 'EdIE-R')
 
     documents = []
     for doc_tag in root.iter('document'):
-        parsed_doc = EdIEDoc.from_xml(doc_tag, proc_all=True)
+        parsed_doc = EdIEDoc.from_xml(doc_tag, proc_all=True,
+                                      entity_source='EdIE-R')
         documents.append(parsed_doc)
 
     return documents
