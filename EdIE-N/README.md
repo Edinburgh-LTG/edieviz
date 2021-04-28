@@ -78,6 +78,7 @@ edien_eval --experiment ../models/LOUHI-EdIE-N-v1 --dataset test
 cd eval
 bash eval_conll.sh ../../models/LOUHI-EdIE-N-v1/output/dev/
 bash eval_conll.sh ../../models/LOUHI-EdIE-N-v1/output/test/
+```
 
 
 Scores that populate the EdIE-N section of Table 2 are in the produced files:
