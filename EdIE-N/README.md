@@ -65,10 +65,11 @@ A better way to visualise model results, would be to run the model using the edi
 
 ## Steps below require access to the Edinburgh Stroke Study dataset
 
-Get in touch with @andreasgrv for more details agrivas at inf dot ed dot ac dot uk.
-
+Please get in touch with @andreasgrv for more details agrivas at inf dot ed dot ac dot uk.
 
 ### Evaluating a model on dev and test
+
+Before you run the commands below, you will need to point the `dev_path` and `train_path` entries of the `blueprint.yaml` files of the downloaded models to the ESS folders.
 
 ```bash
 # Evaluate on dev set
