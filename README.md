@@ -1,4 +1,4 @@
-# EdIE: Information Extraction from Brain Radiology Reports
+# EdIE-viz: Information Extraction from Brain Radiology Reports
 
 Herein lies the code for our [paper](https://www.aclweb.org/anthology/2020.louhi-1.4.pdf) we presented at [LOUHI 2020](https://louhi2020.fbk.eu/):
 
