@@ -462,7 +462,4 @@ class EdFFMT(torch.nn.Module):
         torch.save(self.state_dict(), path)
 
     def load(self, path):
-        try:
-            self.load_state_dict(torch.load(path))
-        except RuntimeError as e:
-            self.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
+        self.load_state_dict(torch.load(path, map_location=torch.device(self.device)))
