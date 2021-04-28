@@ -8,18 +8,18 @@ fi
 # $1 has the folder containing conll files
 for file in $(ls "$1"/?*.conll)
 do
-	perl $EDIEN_PATH/eval/conlleval.pl < $file > "$file.stats"
+	perl $EDIEN_PATH/EdIE-N/eval/conlleval.pl < $file > "$file.stats"
 done
 
 # Run stats.py to aggregate results
 out_folder=$(dirname "$1/a")
 cat $(ls "$1"/{ner_tags.conll.stats,mod_tags.conll.stats}) > "${out_folder}/total"
-python3 $EDIEN_PATH/eval/stats.py "${out_folder}/total" > "${out_folder}/results"
+python3 $EDIEN_PATH/EdIE-N/eval/stats.py "${out_folder}/total" > "${out_folder}/results"
 cat "${out_folder}/results"
 echo -e "Also wrote results to: ${out_folder}/results\n"
 
 cat $(ls "$1"/{negation_ner_tags.conll.stats,negation_mod_tags.conll.stats}) > "${out_folder}/neg_total"
-python3 $EDIEN_PATH/eval/stats.py "${out_folder}/neg_total" > "${out_folder}/neg_results"
+python3 $EDIEN_PATH/EdIE-N/eval/stats.py "${out_folder}/neg_total" > "${out_folder}/neg_results"
 cat "${out_folder}/neg_results"
 
 echo "Also wrote results to: ${out_folder}/neg_results"
