@@ -1,3 +1,5 @@
+# [EdIE-viz](http://jekyll.inf.ed.ac.uk/edieviz/)
+
 ### Installation
 
 From the EdIE-viz folder run:
@@ -15,7 +17,7 @@ The webapp also relies on some environment variables that specify where to find 
 In the environment variables below you need to specify the **absolute** paths to:
 
 * the EdIE-R run-edier script (eg. ../EdIE-R/scripts/run-edier)
-* the specific experiment folder (eg. ../EdIE-N/experiments/EdIE-N-v1)
+* the specific experiment folder (eg. ../models/LOUHI-EdIE-N-v1)
 * the absolute path to the EdIE-N folder
 
 ```bash
@@ -27,9 +29,10 @@ export EDIEN_PATH=..
 
 ### Running the webapp
 
-Assuming you followed the EdIE-N README.md instructions and downloaded the model, you can then run:
+Assuming you followed the EdIE-N README.md instructions and downloaded the models, you can then run:
+
 ```bash
-python app.py --experiment ../EdIE-N/experiments/EdIE-N-v1/
+python app.py --experiment ../models/LOUHI-EdIE-N-v1/
 ```
 
 Then navigate to http://localhost:3000 in your browser.

@@ -11,7 +11,6 @@ from edien.train_utils import only_pseudorandomness_please, eval_loop
 from edien.data.ess import EdIEDoc, EdIELoader
 from edien.data.base import Sentence
 from edier import prepare_input, get_edier_output
-from reverse_proxy import ReverseProxied
 
 
 class InputSentence(Sentence):
@@ -30,7 +29,6 @@ class InputSentence(Sentence):
 
 
 app = Flask(__name__)
-app.wsgi_app = ReverseProxied(app.wsgi_app, script_name='/edieviz')
 app.jinja_env.filters['zip'] = zip
 bp = None
 model = None
