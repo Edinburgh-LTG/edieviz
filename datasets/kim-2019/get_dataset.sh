@@ -56,6 +56,8 @@ else
 	exit 1
 fi
 
+mkdir -p documents
+
 cat edier-documents.xml |
 	../../EdIE-R/bin/sys-x86-64-el7/lxreplace -q "relations|ents|@choice" -t "" |
 	../../EdIE-R/bin/sys-x86-64-el7/lxreplace -q ent -t "&children;" |
