@@ -18,5 +18,3 @@ else
 	echo 'Failed downloading models, exiting...'
 	exit 1
 fi
-
-# Adapt paths in downloaded blueprints to be the global paths

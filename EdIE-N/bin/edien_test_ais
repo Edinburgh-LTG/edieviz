@@ -2,6 +2,7 @@
 import re
 import os
 import copy
+import tqdm
 import torch
 import dataclasses
 from argparse import ArgumentParser
@@ -205,20 +206,18 @@ if __name__ == "__main__":
                              no_labels=True)
     test_sents = loaded.sentences
     test = bp.data.encode(test_sents, bp.paths)
-    # data_folder = bp.data.dataset.test_filename
     base_foldername = os.path.basename(os.path.normpath(args.in_folder))
 
     for task in bp.model.model.tasks:
         model.model.tasks[task].label_vocab = bp.data.vocab_encoder.vocabs[task]
 
-    print(base_foldername)
     folder_path = bp.paths.for_output(base_foldername)
-    print(folder_path)
 
     if not os.path.isdir(folder_path):
         print('Creating directory %s' % folder_path)
         os.makedirs(folder_path)
 
+    print('Running model on AIS data...')
     preds = model.predict(test)
 
     dec_test_y = bp.data.decode(test)
@@ -235,7 +234,8 @@ if __name__ == "__main__":
         preds_by_sent_id[sent.sent_id] = sent_preds
         i += sent_len
 
-    for doc in loaded.docs:
+    print('Writing output documents...')
+    for doc in tqdm.tqdm(loaded.docs):
         doc_sents = []
         for sent in doc.sentences:
             preds_sid = preds_by_sent_id.get(sent.sent_id, None)

@@ -183,9 +183,14 @@ if __name__ == "__main__":
     prec = float(TPs) / (TPs + FPs) if TPs + FPs > 0 else 0.
     rec = float(TPs) / (TPs + FNs) if TPs + FNs > 0 else 0.
     F1 = (2 * prec * rec) / (prec + rec) if (prec + rec) != 0. else 0.
+    # The numbers below should match CONLL eval
     print('ALL: TP: %d; FP: %d; FN: %d' % (TPs, FPs, FNs))
     print('Prec : %.2f' % (100 * prec))
     print('Rec  : %.2f' % (100 * rec))
     print('F1   : %.2f' % (100 * F1))
     error_counts = Counter(segment_classes)
+    # The numbers below are the breakdown of errors
+    # each label error counts as 2 errors (a FP + FN)
+    # and each boundary and boundary + label error counts as at least 2 errors
+    # in the CONLL score
     print(json.dumps([args.name, error_counts]))

@@ -23,6 +23,9 @@ This repository contains systems and tools for information extraction from brain
 git clone https://github.com/Edinburgh-LTG/edieviz
 ```
 
+For instructions on how to install and run each system refer to the README files in their corresponding folders.
+The instructions **assume that you are in the corresponding folder** (eg. EdIE-N folder to install EdIE-N)
+
 Tested on:
 
 * Debian Linux (buster - kernel: 4.19)
@@ -33,9 +36,6 @@ OS dependencies:
 
 * wget
 * dos2unix
-
-For instructions on how to install and run each system refer to the README files in their corresponding folders.
-The instructions **assume that you are in the corresponding folder** (eg. EdIE-N folder to install EdIE-N)
 
 
 ## Citation

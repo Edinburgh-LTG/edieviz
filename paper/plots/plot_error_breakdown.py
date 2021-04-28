@@ -23,12 +23,13 @@ if __name__ == "__main__":
             results[k] = v
 
         pass
+    print(results)
     fig, ax = plt.subplots(figsize=(8, 6))
 
     keys = ['FP', 'FN', 'LABEL_ERROR', 'BOUNDARY_ERROR', 'LABEL+BOUNDARY_ERROR']
     view = ['FP', 'FN', 'Label', 'Boundary', 'Label & Boundary']
     labels = [r.replace('_', ' ') for r in results.keys()]
-    idxs = dict(zip(results.keys(), [0, 1, 2.5, 3.5]))
+    idxs = dict(zip(results.keys(), [0, 1, 2.5, 3.5, 5, 6]))
     colours = dict(zip(view, [cm.tab20(x) for x in range(len(view))]))
     for k, counts in results.items():
         vals = np.array([counts.get(k, 0) for k in keys])

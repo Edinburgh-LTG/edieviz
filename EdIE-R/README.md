@@ -1,4 +1,10 @@
-### How to run EdIE-R
+# EdIE-R
+
+EdIE-R is a bespoke rule-based system for Information Extraction from radiology reports developed by [Claire Grover](https://homepages.inf.ed.ac.uk/grover/).
+
+Behind the scenes, it relies on [Richard Tobin's](http://www.ltg.ed.ac.uk/~richard/) [LT-XML-2](http://www.cogsci.ed.ac.uk/~richard/ltxml2/).
+
+## Running EdIE-R
 
 Some synthetic radiology reports are provided in example/synth-in, as well as the expected output for these files in example/synth-out.
 
@@ -16,4 +22,14 @@ Multiple XML records can be concatenated and grouped inside a top-level <records
 
 ```bash
 cat example/synth-in/allrecords.xml | ./scripts/run-edier -t xml
+```
+
+## Using EdIE-R / LT-XML-2 binaries
+The easiest way is to add include the binaries in your `PATH` environment variable.
+
+**You will need to choose the binaries that match your architecture**.
+
+Assuming you are in the **EdIE-R** directory, you can run:
+```bash
+export PATH=$PATH:$(pwd)/bin/sys-x86-64-el7
 ```

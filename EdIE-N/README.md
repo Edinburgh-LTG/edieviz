@@ -1,4 +1,7 @@
-### Installation
+# EdIE-N
+
+
+## Install
 
 ```bash
 export EDIEN_ROOT="$(pwd)"
@@ -13,20 +16,19 @@ export EDIER_RUN="$EDIEN_ROOT/EdIE-R/scripts/run-edier"
 ```
 
 
-### Downloading and running released model on text
+## Download trained models
 
 ```bash
-mkdir -p experiments && cd experiments
-wget http://jekyll.inf.ed.ac.uk/edieviz/static/models/EdIE-N-v1.zip
-unzip EdIE-N-v1.zip
-cd ..
+cd ../models
+bash download_models.sh
+cd EdIE-N
 ```
 
 
-### Run released model on text from stdin
+## Run released models on text from stdin
 
 ```bash
-edien_eval_stdin --experiment experiments/EdIE-N-v1 <<< "No masses or extra-axial collections."
+edien_eval_stdin --experiment ../models/LOUHI-EdIE-N-v1 <<< "No masses or extra-axial collections."
 ```
 
 The above should print the following json containing both EdIE-N predictions and EdIE-R predictions:
@@ -52,6 +54,12 @@ The above should print the following json containing both EdIE-N predictions and
 }
 ```
 
+For the model that uses [NCBI-BERT](https://github.com/ncbi-nlp/bluebert):
+
+```bash
+edien_eval_stdin --experiment ../models/LOUHI-ncbi-bert/ <<< "No masses or extra-axial collections."
+```
+
 A better way to visualise model results, would be to run the model using the edieviz web app - see the README.md file in the EdIE-viz folder.
 
 
@@ -61,30 +69,32 @@ Get in touch with @andreasgrv for more details agrivas at inf dot ed dot ac dot 
 
 
 ### Evaluating a model on dev and test
+
 ```bash
 # Evaluate on dev set
-edien_eval --experiment experiments/EdIE-N-v1 --dataset dev
+edien_eval --experiment ../models/LOUHI-EdIE-N-v1 --dataset dev
 # Evaluate on test set
-edien_eval --experiment experiments/EdIE-N-v1 --dataset test
+edien_eval --experiment ../models/LOUHI-EdIE-N-v1 --dataset test
 cd eval
-bash eval_conll.sh ../experiments/EdIE-N-v1/output/dev/
-bash eval_conll.sh ../experiments/EdIE-N-v1/output/test/
-```
+bash eval_conll.sh ../../models/LOUHI-EdIE-N-v1/output/dev/
+bash eval_conll.sh ../../models/LOUHI-EdIE-N-v1/output/test/
+
 
 Scores that populate the EdIE-N section of Table 2 are in the produced files:
 ```bash
 echo -e "Entity tags scores\n" &&
-cat ../experiments/EdIE-N-v1/output/test/ner_tags.conll.stats &&
+cat ../../models/LOUHI-EdIE-N-v1/output/test/ner_tags.conll.stats &&
 echo -e "\nModifer tags scores\n" &&
-cat ../experiments/EdIE-N-v1/output/test/mod_tags.conll.stats &&
+cat ../../models/LOUHI-EdIE-N-v1/output/test/mod_tags.conll.stats &&
 echo -e "\nNegation scores (including error propagation from modifier/entity tagging)\n" &&
-cat ../experiments/EdIE-N-v1/output/test/neg_results
+cat ../../models/LOUHI-EdIE-N-v1/output/test/neg_results
 ```
 
-Note: results will differ slightly if training is performed on CPU.
-
+Also run the same steps as above for `LOUHI-ncbi-bert`.
 
 ### Training a model
+
+**Note: results will differ slightly if training is performed on CPU.**
 
 In order to train a model on your own data you will need to define a data loader following the example in *edien/data/ess.py*.
 
@@ -93,7 +103,7 @@ The model choices specified in the paper are reflected in the blueprint **EdIE-N
 From the EdIE-N folder, run:
 
 ```bash
-edien_train --load_blueprint blueprints/EdIE-N-v1.yaml
+edien_train --load_blueprint path-to-blueprint
 ```
 
 

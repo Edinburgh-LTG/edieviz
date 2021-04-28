@@ -1,56 +1,7 @@
 import logging
 import torch
 import numpy as np
-import nltk
 from edien.vocab import Vocab
-
-
-tokenizer = None
-sent_splitter = None
-
-
-def sent_split_spans(chunk):
-    global sent_splitter
-    if sent_splitter is None:
-        sent_splitter = nltk.tokenize.punkt.PunktSentenceTokenizer()
-    spans = [(start, end)
-             for start, end in sent_splitter.span_tokenize(chunk)]
-    return spans
-
-
-def sent_split(chunk):
-    global sent_splitter
-    if sent_splitter is None:
-        sent_splitter = nltk.tokenize.punkt.PunktSentenceTokenizer()
-    return sent_splitter.tokenize(chunk)
-
-
-def tokenize(sent):
-    global tokenizer
-    # tokenizer variable is global - avoid initialising this if we don't use it
-    if tokenizer is None:
-        tokenizer = nltk.tokenize.TreebankWordTokenizer()
-    tokens = tokenizer.tokenize(sent)
-    return tokens
-
-
-def tokenize_labels(chunks, labels, out_label, use_tokenizer=True):
-    split_tokens, split_labels = [], []
-    for chunk, label in zip(chunks, labels):
-        if use_tokenizer:
-            tokenised = tokenize(chunk)
-        else:
-            tokenised = chunk.split()
-        split_tokens.extend(tokenised)
-        if label == out_label:
-            split_labels.extend([out_label, ] * len(tokenised))
-        else:
-            start_label = 'B-%s' % label
-            in_label = 'I-%s' % label
-            split_labels.append(start_label)
-            if len(tokenised) > 1:
-                split_labels.extend([in_label, ] * (len(tokenised) - 1))
-    return split_tokens, split_labels
 
 
 def is_variablisable(variable):

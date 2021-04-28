@@ -1,6 +1,5 @@
 import os
 import math
-import nltk
 import importlib
 import numpy as np
 from dataclasses import dataclass

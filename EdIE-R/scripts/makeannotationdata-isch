@@ -1,0 +1,55 @@
+#!/bin/sh
+
+usage="makeannotationdata -d dirforfiles <input"
+
+descr="Convert to brat format."
+
+# cat ../../data/sysout/sysout/devset.xml | ./makeannotationdata -d ../../data/sysout/bratformat/devset
+
+. `dirname $0`/setup
+
+while [ $# -gt 0 ]; do
+  arg=$1
+  shift
+  case $arg in
+    -d)
+      dir=$1
+      shift
+      ;;
+    *)
+      echo "usage: $usage" >&2
+      exit 2
+  esac
+done
+
+if [ $# -ne -0 -o -z "$dir" ]; then
+  echo "usage: $usage" >&2
+  exit 2
+fi
+
+lib=$here/lib/annot
+
+cat >$dir/input
+
+(cd $dir ; cat input | lxt -s $here/lib/annot/splitfile.xsl ; rm input)
+
+for f in $dir/*[0-9].xml 
+do 
+
+	fname=`basename $f .xml`
+
+	cat $f |
+	lxt -s $here/lib/annot/makeannot-isch.xsl |
+	lxreplace -q "s//ent" >$dir/$fname-ann.xml
+
+done
+
+# for f in $dir/*-ann.xml 
+# 	do 
+#
+# 	fname=`basename $f -ann.xml`
+#
+# 	cat $f |
+# 	xml-to-brat $dir/$fname 
+#
+# done
