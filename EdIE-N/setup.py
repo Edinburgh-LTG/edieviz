@@ -11,7 +11,9 @@ setup(
       keywords=['clinical concept recognition'],
       scripts=['bin/edien_eval',
                'bin/edien_eval_stdin',
-               'bin/edien_train'],
+               'bin/edien_train',
+               'bin/edien_test_ais',
+               ],
       classifiers=[],
       # We are depending on dict order insertion (new in 3.7)
       # + we are using dataclasses

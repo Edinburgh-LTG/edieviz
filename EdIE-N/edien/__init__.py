@@ -9,7 +9,7 @@ class EdIENPath(object):
 
     # We set some basic paths in the following environment variables
     EDIEN_PATH = 'EDIEN_PATH'
-    EXP_PATH = 'experiments'
+    EXP_PATH = 'models'
     PREPROCESS_PATH = 'preprocess'
     DATA_PATH = 'datasets'
     EXT_DATA_PATH = 'data'

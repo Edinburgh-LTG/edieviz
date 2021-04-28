@@ -1,7 +1,37 @@
 import logging
 import torch
 import numpy as np
+import nltk
 from edien.vocab import Vocab
+
+
+tokenizer = None
+sent_splitter = None
+
+
+def sent_split_spans(chunk):
+    global sent_splitter
+    if sent_splitter is None:
+        sent_splitter = nltk.tokenize.punkt.PunktSentenceTokenizer()
+    spans = [(start, end)
+             for start, end in sent_splitter.span_tokenize(chunk)]
+    return spans
+
+
+def sent_split(chunk):
+    global sent_splitter
+    if sent_splitter is None:
+        sent_splitter = nltk.tokenize.punkt.PunktSentenceTokenizer()
+    return sent_splitter.tokenize(chunk)
+
+
+def tokenize(sent):
+    global tokenizer
+    # tokenizer variable is global - avoid initialising this if we don't use it
+    if tokenizer is None:
+        tokenizer = nltk.tokenize.TreebankWordTokenizer()
+    tokens = tokenizer.tokenize(sent)
+    return tokens
 
 
 def tokenize_labels(chunks, labels, out_label, use_tokenizer=True):

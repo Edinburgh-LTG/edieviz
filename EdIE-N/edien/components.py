@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from itertools import chain
 from edien.crf import CRF
 from edien.preprocess import VariableSequencePacker
+from pytorch_transformers import BertModel, BertConfig
 
 
 class PaddedBatchNorm(torch.nn.Module):
@@ -442,6 +443,72 @@ class BiLSTMSentenceEncoder(torch.nn.Module):
         return act
 
 
+class BertSentenceEncoder(torch.nn.Module):
+
+    def __init__(self, bert_file, inputs):
+        super(BertSentenceEncoder, self).__init__()
+
+        self.bert_file = bert_file
+        # self.encoder = BertModel.from_pretrained(self.bert_file)
+        self.config = BertConfig()
+        self.encoder = BertModel(self.config)
+        self.inputs = inputs
+
+    def forward(self, X, sent_lens):
+        # NOTE: sent_lens is output tokens
+        word_mask = X.word_mask
+        tokens = X.tokens
+
+        max_sent_len = max(sent_lens)
+
+        # Padding in Bert uses the zero index
+        attention_mask = tokens != -1
+        word_mask[word_mask == -1] = 0
+        tokens[tokens == -1] = 0
+
+        # Use sequence of hidden-states at the output of the last layer 
+        act = self.encoder(input_ids=tokens, attention_mask=attention_mask)[0]
+
+        # Drop CLS activation
+        act = act[:, 1:]
+
+        # batch_size x word_piece_tokens x embed_dim
+        bs, ss_plus_sep, emb_dim = act.shape
+
+        # Bert activations also include subtoken activations - which we don't
+        # want to use when doing token level prediction
+        # we therefore follow the BERT paper and only use the activation from
+        # the first subtoken when wordpiece split our token
+
+        # This is a bit complicated.. bear with me
+        # In word_mask we have stored a boolean mask with ones in indices
+        # where we fed in tokens or the first subtoken of a wordpiece split
+
+        #    word_mask
+        # 1 1 0 1 0 0 1 0 0
+
+        #      act           # imagine each number is an embedding (column)
+        # 1 2 3 4 5 6 7 8 9
+
+        #   reordered act    # we want to move the subword tokens to the right
+        # 1 2 4 7 3 5 6 8 9
+
+        decrease_word_mask = word_mask * torch.arange(word_mask.shape[1], 0, -1, device=word_mask.device).view(1, -1)
+        sort_indices = torch.argsort(decrease_word_mask, dim=1, descending=True)
+        # sort_indices will place the embeddings in consecutive order at the
+        # beginning of the sequence.
+        sort_indices = sort_indices.unsqueeze(2).expand(-1, -1, emb_dim)
+        act = torch.gather(act, 1, sort_indices)
+
+        # print(act.shape)
+        mask_lens = torch.sum(word_mask, 1)
+        assert torch.sum(mask_lens == torch.tensor(sent_lens, device=mask_lens.device)) == bs
+        # Truncate anything longer than sentence length
+        act = act[:, :max_sent_len].contiguous()
+
+        return act
+
+
 class BottleneckMLP(torch.nn.Module):
     """A single hidden layer with Relu activation"""
 
@@ -570,8 +637,7 @@ class TaskMLP(torch.nn.Module):
     def forward(self, X, y,
                 sentence_lengths,
                 batch_data,
-                predict_proba=False,
-                predictions=None):
+                predict_proba=False):
 
         bs, ss, hid = X.shape
 
@@ -579,7 +645,6 @@ class TaskMLP(torch.nn.Module):
             for inp_name in self.pipe_inputs:
                 surrogate = self.surrogate_embedding.expand_as(X)
 
-                # print(batch_data[inp_name])
                 inp = batch_data[inp_name].unsqueeze(-1).expand_as(X)
 
                 X = X + torch.where(inp > 0, surrogate, torch.zeros_like(X))
@@ -602,7 +667,7 @@ class TaskMLP(torch.nn.Module):
             if y is not None:
                 # We normalise the loss by the number of valid labels. Use mask
                 # to calculate this since some labels are actually padding.
-                num_predictions = torch.sum(mask)
+                # num_predictions = torch.sum(mask)
                 loss = - self.crf(act, y, mask=mask, reduction='token_mean')
                 self.loss += loss
 

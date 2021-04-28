@@ -1,5 +1,6 @@
 import subprocess
 import numpy as np
+import xxhash
 from functools import reduce, partial
 from itertools import chain
 from collections import namedtuple
@@ -37,3 +38,7 @@ def get_current_git_hash():
     # encode to str
     str_git_hash = cli_out.rstrip().decode()
     return str_git_hash
+
+
+def get_hash(s):
+    return xxhash.xxh32(s).hexdigest()

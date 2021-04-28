@@ -13,6 +13,18 @@
     <xsl:value-of select="@order_item"/>
   </attr>
   <xsl:text>&#10;</xsl:text>
+  <xsl:if test="@origid">
+    <attr name="origid">
+      <xsl:value-of select="@origid"/>
+    </attr>
+    <xsl:text>&#10;</xsl:text>
+  </xsl:if>
+  <xsl:if test="@goldlabel">
+    <attr name="goldlabel">
+      <xsl:value-of select="@goldlabel"/>
+    </attr>
+    <xsl:text>&#10;</xsl:text>
+  </xsl:if>
   </meta>
   <xsl:text>&#10;</xsl:text>
   <text>
@@ -33,4 +45,3 @@
 </xsl:template>
 
 </xsl:stylesheet>
-

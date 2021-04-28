@@ -1,5 +1,8 @@
 import os
+import math
+import nltk
 import importlib
+import numpy as np
 from dataclasses import dataclass
 from itertools import chain
 from edien.vocab import Vocab
@@ -9,7 +12,7 @@ from edien import EdIENPath
 class Dataset(object):
     """Base representation of a Dataset. For each <prefix>Dataset class that
     subclasses this class, we assume a <prefix>Loader class with the same
-    <prefix> will be define in the module. This parent class apart from
+    <prefix> will be defined in the module. This parent class apart from
     defining some utilities and useful fundamentals, also implements the
     barebone functionality for loading sentences, which may actually
     suffice and not need overriding."""
@@ -17,14 +20,18 @@ class Dataset(object):
     def __init__(self,
                  train_path,
                  dev_path=None,
-                 test_path=None):
+                 test_path=None,
+                 train_perc=1.):
         super(Dataset, self).__init__()
         if isinstance(train_path, list) or isinstance(train_path, tuple):
-            self.train_paths = [Dataset.get_path(p) for p in train_path]
+            self.train_path = [Dataset.get_path(p) for p in train_path]
         else:
             self.train_path = Dataset.get_path(train_path)
         self.dev_path = Dataset.get_path(dev_path)
         self.test_path = Dataset.get_path(test_path)
+        # Percentage of the training set to use
+        assert 0. < train_perc <= 1.
+        self.train_perc = train_perc
         module = importlib.import_module(self.__module__)
         # Assumes a __name__Loader is defined in the same module
         loader_name = self.name.replace('Dataset', 'Loader')
@@ -42,27 +49,37 @@ class Dataset(object):
     def name(self):
         return self.__class__.__name__
 
+    def load_sentences(self, path, section):
+        possible_sections = ('train', 'dev', 'test')
+        if section not in possible_sections:
+            raise ValueError('Section not in %s' % possible_sections)
+        sentences = tuple(self.loader.load(path).sentences)
+        return sentences
+
     @property
     def train_sents(self):
-        loader = self.loader
-        train = loader.load(self.train_path)
-        train_sentences = tuple(train.sentences)
-        print('Loaded %d train sentences' % len(train_sentences))
+        train_sentences = self.load_sentences(self.train_path, 'train')
+        if self.train_perc != 1.:
+            total_sents = len(train_sentences)
+            subset_sents = int(math.ceil(self.train_perc * total_sents))
+            train_sentences = list(train_sentences)
+            np.random.shuffle(train_sentences)
+            train_sentences = tuple(train_sentences[:subset_sents])
+            print('Loaded %d out of %d train sentences' %
+                  (len(train_sentences), total_sents))
+        else:
+            print('Loaded %d train sentences' % len(train_sentences))
         return train_sentences
 
     @property
     def dev_sents(self):
-        loader = self.loader
-        dev = loader.load(self.dev_path)
-        dev_sentences = tuple(dev.sentences)
+        dev_sentences = self.load_sentences(self.dev_path, 'dev')
         print('Loaded %d dev sentences' % len(dev_sentences))
         return dev_sentences
 
     @property
     def test_sents(self):
-        loader = self.loader
-        test = loader.load(self.test_path)
-        test_sentences = tuple(test.sentences)
+        test_sentences = self.load_sentences(self.test_path, 'test')
         print('Loaded %d test sentences' % len(test_sentences))
         return test_sentences
 

@@ -1,20 +1,23 @@
 import os
 import re
+import copy
 import numpy as np
 import dataclasses
 
 from dataclasses import dataclass
 from collections import Counter, defaultdict
 from itertools import chain
+from intervaltree import IntervalTree
 from xml.etree import ElementTree as ET
 from edien.data import base
 from edien.vocab import Vocab
+from edien.utils import get_hash
 
 
 class EdIELoader(object):
 
     def __init__(self, folder, docs):
-        super(EdIELoader, self).__init__()
+        super().__init__()
         self.folder = folder
         self.docs = docs
 
@@ -50,11 +53,23 @@ class EdIELoader(object):
             ids = tuple(f.read().split('\n'))
         return ids
 
+    @staticmethod
+    def fix_relation_source(parse_obj):
+        standoff = parse_obj.find(EdIEDoc.XML_STANDOFF)
+        rels = standoff.findall(EdIEDoc.XML_ST_RELS)
+        for rel in rels:
+            source = rel.get('source')
+            if source is None:
+                rel.set('source', 'gold')
+        return parse_obj
+
     @classmethod
-    def load(cl, folder, ignore_ids=None):
+    def load(cl, folder, ignore_ids=None, **kwargs):
         ignore_ids = ignore_ids or []
+
         # Below documents have overlapping modifier tags
-        ignore_ids.extend(['18001', '1914', '21928', '26146'])
+        # ignore_ids.extend(['18001', '1914', '21928', '26146'])
+
         # NOTE: not sure if we will always be able to filter out by id
         # without the actual need to open the file.
         # NOTE 2: We use ignore_ids to load a train and dev set
@@ -62,137 +77,15 @@ class EdIELoader(object):
         docs = []
         for fn in filenames:
             root = ET.parse(fn)
-            for doc_tag in root.iter('document'):
-                parsed_doc = EdIEDoc.from_xml(doc_tag)
-                docs.append(parsed_doc)
+            # Monkeypatch: Add gold source attribute to relations if non existent
+            root = EdIELoader.fix_relation_source(root)
+            # We are assuming each file has a single document
+            parsed_doc = EdIEDoc.from_xml(root, **kwargs)
+            docs.append(parsed_doc)
         if docs:
             return cl(folder, docs)
         else:
             raise ValueError('No documents found in %s' % folder)
-
-    # def find_train_dev_split(self,
-    #                          y_label,
-    #                          train_split=.9,
-    #                          split_tolerance=.02,
-    #                          attempts=100):
-    #     """
-    #     Heuristic approach - no guarantees.
-    #     Shuffle dataset, impose constraints
-    #
-    #     Assumptions:
-    #         1. Don't mix sentences between documents
-    #         2. Dev set should have at least one example of each class
-    #         3. Percentage of sentences in train should be:
-    #            train_split +- split_tolerance
-    #         4. Proportion of classes should be as close as possible
-    #
-    #     y_label: attribute over which we want the distribution to be
-    #     approximately equal
-    #
-    #     train_split: percentage of sentences we want for training
-    #
-    #     split_tolerance: split won't be exact, accept if within +- margin
-    #
-    #     attempts: how many times to randomly shuffle docs and try
-    #
-    #     returns: list of document ids
-    #     """
-    #
-    #     np.random.seed(5)
-    #     assert(0 < train_split < 1)
-    #     assert(attempts > 0)
-    #     assert(train_split + split_tolerance < 1)
-    #     assert(train_split - split_tolerance > 0)
-    #     # acceptability range allows
-    #     num_docs = len(self.docs)
-    #     doc_indices = np.arange(num_docs)
-    #
-    #     lucky_seeds = np.arange(attempts)
-    #     num_docs_train = int(num_docs * train_split)
-    #
-    #     best_class_distr_train = None
-    #     best_class_distr_dev = None
-    #     best_train_doc_ids = None
-    #     best_sent_split = None
-    #     best_kl = np.inf
-    #
-    #     PRINT_EVERY = 100
-    #
-    #     print('Running for a total of %d attempts' % attempts)
-    #     for i, seed in enumerate(lucky_seeds):
-    #         if i % PRINT_EVERY == (PRINT_EVERY - 1):
-    #             print('Have run %d attempts. Best kl: %.4f' % ((i + 1), best_kl), end='\r')
-    #         np.random.seed(seed)
-    #         # Histograms for train/dev split
-    #         candidate_train_indices = np.random.choice(doc_indices,
-    #                                                    size=num_docs_train,
-    #                                                    replace=False)
-    #
-    #         candidate_dev_indices = [i for i in doc_indices
-    #                                  if i not in candidate_train_indices]
-    #
-    #         train_sents = tuple(chain.from_iterable(self.docs[i].sentences
-    #                                           for i in candidate_train_indices))
-    #         dev_sents = tuple(chain.from_iterable(self.docs[i].sentences
-    #                                         for i in candidate_dev_indices))
-    #
-    #         train_keys, train_counts = zip(*Counter(
-    #                                        chain.from_iterable(getattr(s, y_label)
-    #                                                            for s in train_sents)
-    #                                                 ).items())
-    #         dev_counter = Counter(chain.from_iterable(getattr(s, y_label)
-    #                                                   for s in dev_sents))
-    #
-    #         train_counts = np.array(train_counts)
-    #         dev_counts = np.array(tuple(dev_counter[k] for k in train_keys))
-    #
-    #         class_distr_train = train_counts / train_counts.sum()
-    #         class_distr_dev = dev_counts / dev_counts.sum()
-    #
-    #         # A doc split doesn't necessary lead to a reasonable sent split
-    #         sent_split_perc = len(train_sents) / (len(train_sents) + len(dev_sents))
-    #         lower_bound = (train_split - split_tolerance)
-    #         upper_bound = (train_split + split_tolerance)
-    #         good_sent_split = lower_bound < sent_split_perc < upper_bound
-    #
-    #         all_classes_in_both = (len(class_distr_train) == len(class_distr_dev))
-    #
-    #         # Check we still have all classes..
-    #         if good_sent_split and all_classes_in_both:
-    #             # Below "entropy" is KL-divergence.
-    #             left_kl = entropy(class_distr_train, class_distr_dev)
-    #             right_kl = entropy(class_distr_train, class_distr_dev)
-    #             kl = (left_kl + right_kl)/2
-    #             if kl < best_kl:
-    #                 best_kl = kl
-    #                 best_sent_split = sent_split_perc
-    #                 best_train_doc_ids = [self.docs[i].doc_id
-    #                                       for i in candidate_train_indices]
-    #                 best_train_keys = train_keys
-    #                 best_train_counts = train_counts
-    #                 best_dev_counts = dev_counts
-    #                 best_class_distr_train = class_distr_train
-    #                 best_class_distr_dev = class_distr_dev
-    #     if best_kl != np.inf:
-    #         print()
-    #         print('Best kl: %.4f' % best_kl)
-    #         print('Best sent split perc: %.4f ' % best_sent_split)
-    #         print('Class distribution')
-    #         KEY_SIZE = 20
-    #         print('Key%s\tTrain\t  Dev\t#Train\t#Dev' % (' ' *(KEY_SIZE - 3)))
-    #         for key, tr_d, dev_d, tr_c, dev_c in zip(best_train_keys,
-    #                                                  best_class_distr_train,
-    #                                                  best_class_distr_dev,
-    #                                                  best_train_counts,
-    #                                                  best_dev_counts):
-    #             print('%s\t%.4f\t%.4f\t%d\t%d' % (key[:KEY_SIZE].ljust(KEY_SIZE),
-    #                                               tr_d,
-    #                                               dev_d,
-    #                                               tr_c,
-    #                                               dev_c))
-    #         return best_train_doc_ids
-    #     else:
-    #         raise ValueError('No splits found')
 
 
 class EdIEDataset(base.Dataset):
@@ -201,47 +94,43 @@ class EdIEDataset(base.Dataset):
                  train_paths,
                  dev_path,
                  test_path,
-                 split_folder=None):
+                 split_folder=None,
+                 **kwargs):
         """Note this can be either ESS or Tayside"""
         assert isinstance(train_paths, list)
-        super(EdIEDataset, self).__init__(train_paths, dev_path, test_path)
+        super().__init__(train_paths,
+                         dev_path,
+                         test_path,
+                         **kwargs)
         self.split_folder = base.Dataset.get_path(split_folder)
 
-    @property
-    def train_sents(self):
-        if self.split_folder:
-            dev_filename = os.path.join(self.split_folder, 'dev_ids.txt')
-            dev_ids = EdIELoader.get_ids_from_file(dev_filename)
+    def load_sentences(self, path, section):
+        if section == 'train':
+            if self.split_folder:
+                dev_filename = os.path.join(self.split_folder, 'dev_ids.txt')
+                dev_ids = EdIELoader.get_ids_from_file(dev_filename)
+            else:
+                dev_ids = []
+
+            ess_folder = self.train_path[0]
+            train = EdIELoader.load(ess_folder, ignore_ids=dev_ids)
+            train_sentences = [t for t in train.sentences if len(t) > 2]
+
+            for folder in self.train_path[1:]:
+                train = EdIELoader.load(folder, ignore_ids=[])
+                train_sentences.extend(train.sentences)
+            return tuple(train_sentences)
+        elif section == 'dev':
+            if self.split_folder:
+                train_filename = os.path.join(self.split_folder, 'train_ids.txt')
+                train_ids = EdIELoader.get_ids_from_file(train_filename)
+            else:
+                train_ids = []
+
+            dev = EdIELoader.load(self.dev_path, ignore_ids=train_ids)
+            return tuple(dev.sentences)
         else:
-            dev_ids = []
-
-        ess_folder = self.train_paths[0]
-        train = EdIELoader.load(ess_folder, ignore_ids=dev_ids)
-        train_sentences = [t for t in train.sentences if len(t) > 2]
-
-        for folder in self.train_paths[1:]:
-            train = EdIELoader.load(folder, ignore_ids=[])
-            train_sentences.extend(train.sentences)
-        print('Loaded %d train sentences' % len(train_sentences))
-        return train_sentences
-
-    @property
-    def dev_sents(self):
-        if self.split_folder:
-            train_filename = os.path.join(self.split_folder, 'train_ids.txt')
-            train_ids = EdIELoader.get_ids_from_file(train_filename)
-        else:
-            train_ids = []
-
-        dev = EdIELoader.load(self.dev_path, ignore_ids=train_ids)
-        print('Loaded %d dev sentences' % len(dev.sentences))
-        return [s for s in dev.sentences if len(s) > 1]
-
-    @property
-    def test_sents(self):
-        test = EdIELoader.load(self.test_path)
-        print('Loaded %d test sentences' % len(test.sentences))
-        return test.sentences
+            return super().load_sentences(path, section)
 
 
 @dataclass(frozen=True)
@@ -249,12 +138,38 @@ class EdIEDoc(base.Document):
     """"""
     doc_id: str
     labels: tuple
+    entities: tuple
+    relations: tuple
+    xml_parse: object
 
     SECTIONS = ('REPORT', 'CONCLUSION')
-    MODIFIER_PREFIXES = ('loc_', 'time_')
     NUM_REPLACE = re.compile(r'[0-9]+')
     # There is a weird deletion character in the data
     DROP_TOKENS = ['\x7f']
+
+    XML_DOC = 'document'
+    XML_TEXT = 'text'
+    XML_STANDOFF = 'standoff'
+    XML_DEFAULT_SOURCE = 'gold'
+    XML_ST_ENTS = 'ents'
+    XML_ST_RELS = 'relations'
+    XML_ST_REL = 'relation'
+    XML_ST_ARG = 'argument'
+    XML_PARTS = 'parts'
+    XML_PART = 'part'
+    XML_PARAGRAPH = 'p'
+    XML_PROCESS = 'proc'
+    XML_ID = 'id'
+    XML_LEMMA = 'l'
+    XML_POS = 'p'
+    XML_WORD = 'w'
+    XML_SENT = 's'
+    XML_ENTITY = 'ent'
+    XML_ENTITY_TYPE = 'type'
+    XML_ENTITY_REF = 'ref'
+    XML_START_WORD = 'sw'
+    XML_END_WORD = 'ew'
+    XML_LABEL = 'label:'
 
     def __repr__(self):
         template = '<EdIEDoc %s : %d report, %d conclusion, tags: %r>'
@@ -297,111 +212,186 @@ class EdIEDoc(base.Document):
         combine = tuple(sorted(modifiers.union(entities)))
         return combine
 
+    @property
+    def label_factors_with_negation(self):
+        """Get all unique modifiers and entities we have from gold dataset,
+         signalling negation in front with neg_
+        """
+
+        def get_with_negation(iterable_name):
+            res = []
+            for s in self.sentences:
+                iterable = getattr(s, iterable_name)
+                for index, ent in enumerate(iterable):
+                    ent = ent[2:]
+                    if len(ent) == 0:
+                        continue
+                    if s.negation[index] == "neg":
+                        ent = "neg_" + ent
+                    res.append(ent)
+            return res
+
+        modifiers = set(get_with_negation("mod_tags"))
+        entities = set(get_with_negation("ner_tags"))
+
+        combine = tuple(sorted(modifiers.union(entities)))
+        return combine
+
+    @property
+    def relation_factors(self):
+        """Get all relations
+        """
+        heads = {}
+        for relation in self.relations:
+            head_id = relation['head']['start_word_id']
+            if head_id not in heads:
+                heads[head_id] = {'type': relation['head']['type'],
+                                  'text': relation['head']['text'],
+                                  'mods': []
+                                  }
+            heads[head_id]['mods'].append(relation['mod'])
+
+        factors = []
+        for head_id in heads:
+            strings = []
+            for mod in heads[head_id]['mods']:
+                strings.append(mod['type'])
+            strings = sorted(strings)
+            strings.append(heads[head_id]['type'])
+            factors.append('_'.join(strings))
+
+        return factors
+
     @classmethod
     def get_document_labels(cl, parse_obj):
         labels = set()
-        for ent_tag in parse_obj.iter('ent'):
-            ent_type = ent_tag.get('type')
-            if ent_type.startswith('label:'):
-                labels.add(ent_type[6:])
+        for ent_tag in parse_obj.iter(EdIEDoc.XML_ENTITY):
+            ent_type = ent_tag.get(EdIEDoc.XML_ENTITY_TYPE)
+            if ent_type.startswith(EdIEDoc.XML_LABEL):
+                labels.add(ent_type[len(EdIEDoc.XML_LABEL):])
         return tuple(labels)
 
     @classmethod
-    def build_entity_dict(cl, parse_obj):
-        """Create mapping from word ids to negated entities and entity types.
+    def build_doc_fields(cl, parse_obj, **kwargs):
+        """Populate document level finding, modifier and relation list
+        from standoff XML tag. Negation is included as part of finding/modifier
 
-        returns: set, dict
+        returns: list, list, list
         """
         # NOTE: We assume all entity/negation/modifier annotations are made
         # in the section delimited by <standoff>
-        standoff = tuple(parse_obj.iter('standoff'))
+        standoff = tuple(parse_obj.iter(EdIEDoc.XML_STANDOFF))
         assert(len(standoff) == 1)
         standoff = standoff[0]
-        # TODO: Add relations
-        # Store which entity word ids are negated
-        negated = set()
         # Store word id to tag lookup
-        entities = dict()
-        modifiers = dict()
-        for ent_tag in standoff.iter('ent'):
-            ent_type = ent_tag.get('type')
-            negated_attr = ent_tag.get('neg', None)
-            if not ent_type.startswith('label:'):
-                label = ent_type.replace('neg_', '')
-                # assert label != 'mod', 'Need to add mod stuff below'
-                if label == 'mod':
-                    label = ent_tag.get('stime')
-                    if label is None:
-                        label = 'loc_%s' % ent_tag.get('sloc')
+        relations, findings, modifiers = [], dict(), dict()
+
+        # Sometimes we want to load an ann.xml file that has no gold labels
+        no_labels = kwargs.get('no_labels', None)
+
+        if not no_labels:
+
+            entity_source = kwargs.get('entity_source', EdIEDoc.XML_DEFAULT_SOURCE)
+            ents = standoff.find("%s/[@source='%s']" % (EdIEDoc.XML_ST_ENTS, entity_source))
+            if ents is None:
+                raise ValueError("Couldn't find ents with source %s" % entity_source)
+            for ent_tag in ents.iter(EdIEDoc.XML_ENTITY):
+                ent_type = ent_tag.get(EdIEDoc.XML_ENTITY_TYPE)
+                if not ent_type.startswith(EdIEDoc.XML_LABEL):
+                    ent = EdIEEntity.from_xml(ent_tag)
+
+                    if ent.is_modifier:
+                        modifiers[ent.ent_id] = ent
                     else:
-                        label = ('time_%s' % label)
-                # Capture negation and remove prefix from type
-                is_modifier = any(label.startswith(p)
-                                  for p in EdIEDoc.MODIFIER_PREFIXES)
-                parts = tuple(ent_tag.iter('part'))
-                assert(len(parts) == 1)
-                part = parts[0]
+                        findings[ent.ent_id] = ent
 
-                start_word_id = part.get('sw')
-                end_word_id = part.get('ew')
-                if is_modifier:
-                    assert start_word_id not in modifiers, 'Overlapping mods in doc %s' % parse_obj.get('id', 'unknown')
-                    modifiers[start_word_id] = ('B-%s' % label)
-                else:
-                    assert start_word_id not in entities, 'Overlapping ents in doc %s' % parse_obj.get('id', 'unknown')
-                    entities[start_word_id] = ('B-%s' % label)
-                if ent_type.startswith('neg_') or negated_attr == 'yes':
-                    negated.add(start_word_id)
-                # If multi word token need to set the In tokens
-                if start_word_id != end_word_id:
-                    current_char_offset = int(start_word_id[1:])
-                    end_char_offset = int(end_word_id[1:])
-                    diff = end_char_offset - current_char_offset
-                    assert diff > 0, 'Ids no longer expressing char offset'
-                    # SPAM lookup with all inbetween (overkill)
-                    for offset in range(diff):
-                        current_char_offset += 1
-                        span_token_id = ('w%d' % current_char_offset)
-                        if is_modifier:
-                            assert span_token_id not in modifiers, 'Overlapping mods'
-                            modifiers[span_token_id] = ('I-%s' % label)
-                        else:
-                            assert span_token_id not in entities, 'Overlapping ents'
-                            entities[span_token_id] = ('I-%s' % label)
-                        if ent_type.startswith('neg_') or negated_attr == 'yes':
-                            negated.add(span_token_id)
+            relation_source = kwargs.get('relation_source', EdIEDoc.XML_DEFAULT_SOURCE)
+            rel_tags = standoff.find("%s/[@source='%s']" % (EdIEDoc.XML_ST_RELS, relation_source))
+            if rel_tags is not None:
+                for rel_tag in rel_tags:
+                    rel_type = rel_tag.get('type')
 
-        return entities, modifiers, negated
+                    head_arg, mod_arg, *rest = tuple(rel_tag.iter(EdIEDoc.XML_ST_ARG))
+                    assert len(rest) == 0
+
+                    head_id = head_arg.get('ref')
+                    head = findings[head_id]
+                    assert not head.is_modifier
+
+                    mod_id = mod_arg.get('ref')
+                    mod = modifiers[mod_id]
+                    assert mod.is_modifier
+
+                    rel = EdIERelation(rel_type, head=head, modifier=mod)
+                    relations.append(rel)
+
+        # We don't need the dict anymore
+        modifiers = tuple(modifiers.values())
+        findings = tuple(findings.values())
+
+        return findings, modifiers, relations
 
     @classmethod
-    def from_xml(cl, parse_obj, proc_all=False):
+    def from_xml(cl, parse_obj, proc_all=False, **kwargs):
         """Parse a EdIE document from XML parser"""
-        entities, modifiers, negated = EdIEDoc.build_entity_dict(parse_obj)
-        doc_id = parse_obj.get('id', None)
+
+        document, *rest = tuple(parse_obj.iter(EdIEDoc.XML_DOC))
+        assert len(rest) == 0
+
+        findings, modifiers, relations = EdIEDoc.build_doc_fields(document, **kwargs)
+
+        # Create an interval tree to easily look up what tags exist
+        # for a particular look up index
+        find_itree = IntervalTree.from_tuples([(f.start_char_idx, f.end_char_idx, f)
+                                               for f in findings])
+
+        mod_itree = IntervalTree.from_tuples([(m.start_char_idx, m.end_char_idx, m)
+                                              for m in modifiers])
+
         sentences = []
         sent_section = 'unknown'
+        doc_id = document.get(EdIEDoc.XML_ID, None)
         # Iterate over all children tags that are sentences
-        for sent_tag in parse_obj.iter('s'):
-            sent_id = sent_tag.get('id', None)
+        for sent_tag in document.iter(EdIEDoc.XML_SENT):
+            sent_id = sent_tag.get(EdIEDoc.XML_ID, None)
             # Some sentences are not to be processed - this is flagged by proc
             process = sent_tag.get('proc', None)
             # Unless we set proc_all, only process proc='yes' sentences.
             if process == 'yes' or proc_all:
                 sent = defaultdict(lambda: [])
-                for word_tag in sent_tag.iter('w'):
+                for word_tag in sent_tag.iter(EdIEDoc.XML_WORD):
                     # Ignore tokens that are errors / dataset irregularities
                     if word_tag.text in cl.DROP_TOKENS:
                         continue
-                    # TODO: Possibly consider stopword list
-                    word_id = word_tag.get('id', '')
+                    word_id = word_tag.get(EdIEDoc.XML_ID, '')
+                    char_idx = int(word_id[1:])
                     # word_string = EdIEDoc.NUM_REPLACE.sub('<d>', word_tag.text)
                     word_string = word_tag.text
-                    lemma = word_tag.get('l', '')
-                    pos_tag = word_tag.get('p', '')
-                    # Lookup word id in entity dictionary and default to O
-                    ner_tag = entities.get(word_id, 'O')
-                    mod_tag = modifiers.get(word_id, 'O')
-                    negation = 'neg' if word_id in negated else 'pos'
+                    lemma = word_tag.get(EdIEDoc.XML_LEMMA, '')
+                    pos_tag = word_tag.get(EdIEDoc.XML_POS, '')
+
+                    # Process findings
+                    negation = 'pos'
+                    ner_tag = 'O'
+                    # Lookup word id in finding dictionary and default to O
+                    intervals = find_itree[char_idx]
+                    if intervals:
+                        (*rest, ner), *more = intervals
+                        assert len(more) == 0, 'Finding annotation overlap'
+                        ner_tag = ner.get_bio(char_idx)
+                        if ner.negated:
+                            negation = 'neg'
+
+                    # Process modifiers
+                    mod_tag = 'O'
+                    intervals = mod_itree[char_idx]
+                    if intervals:
+                        (*rest, mod), *more = intervals
+                        assert len(more) == 0, 'Modifier annotation overlap'
+                        mod_tag = mod.get_bio(char_idx)
+                        if mod.negated:
+                            negation = 'neg'
+
                     # word_type = word_tag.get('type', '')
                     # head = word_tag.get('headn', '')
                     # TODO: lookup label in dict to change
@@ -426,10 +416,16 @@ class EdIEDoc(base.Document):
                     section = children[0].text
                     if section in EdIEDoc.SECTIONS:
                         sent_section = section
-        labels = EdIEDoc.get_document_labels(parse_obj)
+
+        labels = EdIEDoc.get_document_labels(document)
+        entities = list(chain(findings, modifiers))
+
         return cl(doc_id=doc_id,
                   sentences=sentences,
-                  labels=labels)
+                  labels=labels,
+                  entities=entities,
+                  relations=relations,
+                  xml_parse=parse_obj)
 
 
 @dataclass(frozen=True)
@@ -480,7 +476,7 @@ class EdIESent(base.Sentence):
                         else:
                             j += 1
                             break
-                    # Below retains number of entities - otherwise we merge neighbouring mentions of same type
+                    # Below retains number of findings - otherwise we merge neighbouring mentions of same type
                     # elif tags[j][2:] == ner_type and tags[j][:2] == 'I-':
                     elif tags[j][2:] == ner_type:
                         right_idx = j
@@ -497,6 +493,11 @@ class EdIESent(base.Sentence):
             else:
                 i += 1
         return tuple(tags)
+
+    @property
+    def ner_tags_cui(self):
+        return tuple(base.tag_to_cui(t, tag_to_cui)
+                     for t in self.ner_tags)
 
     @property
     def ner_tags_untyped(self):
@@ -549,6 +550,57 @@ class EdIESent(base.Sentence):
                      or mod[:2] in ('B-', 'I-') else ner
                      for mod, ner in zip(self.mod_tags,
                                          self.ner_tags))
+
+    def get_entities(self, iob_field):
+        entities, entity = [], dict()
+        prev_tag = 'O'
+        for i, ent in enumerate(iob_field):
+            ent_tag = ent[2:] or 'O'
+            # Found a start entity
+            if ent.startswith('B-'):
+                # close if half constructed
+                if entity:
+                    entity['end'] = i
+                    entities.append(entity)
+                    entity = dict()
+                # start
+                entity['start'] = i
+                entity['type'] = ent_tag
+                if self.negation[i] == 'neg':
+                    entity['neg'] = True
+            # Changed type
+            elif ent_tag != prev_tag:
+                # close if half constructed
+                if entity:
+                    entity['end'] = i
+                    entities.append(entity)
+                    entity = dict()
+                if ent_tag != 'O':
+                    # start
+                    entity['start'] = i
+                    entity['type'] = ent_tag
+                    if self.negation[i] == 'neg':
+                        entity['neg'] = True
+            prev_tag = ent_tag
+        # Close any left over entities
+        if entity:
+            entity['end'] = i + 1
+            entities.append(entity)
+
+        entity_objs = []
+        word_ids = self.word_ids
+        for ent in entities:
+            label = ent['type']
+            span = (word_ids[ent['start']], word_ids[max(0, ent['end'] - 1)])
+            text = ' '.join(self.tokens[ent['start']: ent['end']])
+            negated = ent.get('neg', False)
+
+            entity_objs.append(EdIEEntity(label=label,
+                                          span=span,
+                                          negated=negated,
+                                          text=text))
+
+        return entity_objs
 
     @property
     def ner_and_mod_tags_bio(self):
@@ -611,3 +663,269 @@ class EdIESent(base.Sentence):
         return EdIESent(sent_id=self.sent_id,
                         section=self.section,
                         **sent_fields)
+
+
+class EdIEEntity(object):
+    """Encapsulate entity (finding/modifier) functionality"""
+
+    NEG_PREFIX = 'neg_'
+    MODIFIER_PREFIX_TIME = 'time_'
+    MODIFIER_PREFIX_LOC = 'loc_'
+    MODIFIER_PREFIXES = (MODIFIER_PREFIX_TIME, MODIFIER_PREFIX_LOC)
+
+    def __init__(self, label, span, negated, text, ent_id=None):
+        super().__init__()
+        self.label = label
+        assert len(span) == 2
+        # The span is in terms of word ids
+        self.span = span
+        # the word ids are of the form w\d+ - where \d+ is the char offset
+        self.start_char_idx = int(span[0][1:])
+        self.end_char_idx = self.start_char_idx + len(text)
+        self.negated = negated
+        self.text = text
+        self.ent_id = ent_id
+
+    def __repr__(self):
+        return '<EdIEEntity:%s> "%s"' % (self.full_type, self.text)
+
+    @property
+    def id(self):
+        s = '%s%s%s' % (self.label, self.span, self.negated)
+        return get_hash(s)
+
+    def get_or_create_id(self):
+        # If we assigned an id when we created this class, return that
+        if self.ent_id is not None:
+            return self.ent_id
+        else:
+            return self.id
+
+    @property
+    def sw(self):
+        return self.span[0]
+
+    @property
+    def ew(self):
+        return self.span[1]
+
+    @property
+    def full_type(self):
+        if self.negated:
+            return '%s%s' % (EdIEEntity.NEG_PREFIX, self.label)
+        return self.label
+
+    @property
+    def is_modifier_time(self):
+        return self.label.startswith(EdIEEntity.MODIFIER_PREFIX_TIME)
+
+    @property
+    def is_modifier_loc(self):
+        return self.label.startswith(EdIEEntity.MODIFIER_PREFIX_LOC)
+
+    @property
+    def is_modifier(self):
+        return any(self.label.startswith(p)
+                   for p in EdIEEntity.MODIFIER_PREFIXES)
+
+    def to_xml(self):
+        ent = ET.Element(EdIEDoc.XML_ENTITY)
+        ent.set(EdIEDoc.XML_ENTITY_TYPE, self.full_type)
+        ent.set(EdIEDoc.XML_ID, self.get_or_create_id())
+
+        parts = ET.SubElement(ent, EdIEDoc.XML_PARTS)
+        part = ET.SubElement(parts, EdIEDoc.XML_PART)
+        part.set(EdIEDoc.XML_START_WORD, self.sw)
+        part.set(EdIEDoc.XML_END_WORD, self.ew)
+        part.text = self.text
+
+        return ent
+
+    @classmethod
+    def from_xml(cl, ent_xml):
+        ent_type = ent_xml.get(EdIEDoc.XML_ENTITY_TYPE)
+        ent_id = ent_xml.get(EdIEDoc.XML_ID)
+        # Capture negation and remove neg prefix to create label
+        negated = False
+        label = ent_type
+        if ent_type.startswith(EdIEEntity.NEG_PREFIX):
+            negated = True
+            label = ent_type[len(EdIEEntity.NEG_PREFIX):]
+        # Parse EdIE-R deprecated output cases where neg was attr
+        elif ent_xml.attrib.get(EdIEEntity.NEG_PREFIX[:-1], 'no') == 'yes':
+            negated = True
+
+        # Parse old EdIE-R format for modifiers
+        if label == 'mod':
+            stime = ent_xml.attrib.get('stime', None)
+            sloc = ent_xml.attrib.get('sloc', None)
+            if stime:
+                label = '%s%s' % (EdIEEntity.MODIFIER_PREFIX_TIME, stime)
+            elif sloc:
+                label = '%s%s' % (EdIEEntity.MODIFIER_PREFIX_LOC, sloc)
+            else:
+                raise ValueError('Invalid old EdIE-R format')
+
+        part, *rest = tuple(ent_xml.iter(EdIEDoc.XML_PART))
+        assert(len(rest) == 0)
+
+        start_word_id = part.get(EdIEDoc.XML_START_WORD)
+        end_word_id = part.get(EdIEDoc.XML_END_WORD)
+        span = (start_word_id, end_word_id)
+        text = part.text
+        return EdIEEntity(label=label,
+                          span=span,
+                          negated=negated,
+                          text=text,
+                          ent_id=ent_id)
+
+    def get_bio(self, char_idx):
+        if char_idx == self.start_char_idx:
+            tag = 'B-%s' % self.label
+        elif char_idx <= self.end_char_idx:
+            tag = 'I-%s' % self.label
+        else:
+            tag = 'O'
+        return tag
+
+
+class EdIERelation(object):
+    """A relation between modifiers and findings (head)"""
+    def __init__(self, label, head, modifier):
+        super().__init__()
+        self.label = label
+        self.modifier = modifier
+        self.head = head
+
+    def __repr__(self):
+        fields = (self.label, self.modifier, self.head)
+        return '<EdIERelation:%s> %r -> %r' % fields
+
+    def __eq__(self, other):
+        eq_labels = self.label == other.label
+        eq_head = self.head.id == other.head.id
+        eq_mod = self.modifier.id == other.modifier.id
+        return all([eq_labels, eq_head, eq_mod])
+
+    def is_valid(self):
+        stroke_type = EdIELabel.S in self.head.label
+        hem_type = EdIELabel.MH in self.head.label
+        return stroke_type or hem_type
+
+    def to_xml(self):
+
+        rel_xml = ET.Element(EdIEDoc.XML_ST_REL)
+        rel_xml.set(EdIEDoc.XML_ENTITY_TYPE, self.label)
+
+        head = ET.SubElement(rel_xml, EdIEDoc.XML_ST_ARG)
+        head.set(EdIEDoc.XML_TEXT, self.head.text)
+        head.set(EdIEDoc.XML_ENTITY_REF, self.head.get_or_create_id())
+
+        mod = ET.SubElement(rel_xml, EdIEDoc.XML_ST_ARG)
+        mod.set(EdIEDoc.XML_TEXT, self.modifier.text)
+        mod.set(EdIEDoc.XML_ENTITY_REF, self.modifier.get_or_create_id())
+        return rel_xml
+
+
+class EdIELabel(object):
+    """A document label"""
+    OLD = 'time_old'
+    RECENT = 'time_recent'
+    DEEP = 'loc_deep'
+    CORTICAL = 'loc_cortical'
+    S = 'stroke'
+    IS = 'ischaemic_stroke'
+    HS = 'haemorrhagic_stroke'
+    T = 'tumour'
+    MT = 'mening_tumour'
+    MST = 'metast_tumour'
+    GT = 'glioma_tumour'
+    SH = 'subarachnoid_haemorrhage'
+    SBH = 'subdural_haematoma'
+    MH = 'microhaemorrhage'
+    HT = 'haemorrhagic_transformation'
+    A = 'atrophy'
+    SVD = 'small_vessel_disease'
+
+    IS_UNDER = 'Ischaemic stroke, underspecified'
+    HS_UNDER = 'Haemorrhagic stroke, underspecified'
+    MB_UNDER = 'Microbleed, underspecified'
+    TU_OTHER = 'Tumour, other'
+
+    def __init__(self, parts):
+        super().__init__()
+        # We don't care about order of parts
+        self.parts = set(parts)
+
+    def __eq__(self, other):
+        return self.text == other.text
+
+    def match(self, *candidate_tags):
+        return all(getattr(EdIELabel, each) in self.parts
+                   for each in candidate_tags)
+
+    @property
+    def text(self):
+        txt = None
+        if self.match('IS', 'DEEP'):
+            if self.match('RECENT'):
+                txt = 'Ischaemic stroke, deep, recent'
+            elif self.match('OLD'):
+                txt = 'Ischaemic stroke, deep, old'
+            # when ischaemic stroke and deep but no time, then infer old
+            else:
+                txt = 'Ischaemic stroke, deep, old'
+        elif self.match('IS', 'CORTICAL', 'RECENT'):
+            txt = 'Ischaemic stroke, cortical, recent'
+        elif self.match('IS', 'CORTICAL', 'OLD'):
+            txt = 'Ischaemic stroke, cortical, old'
+        elif self.match('IS'):
+            txt = self.IS_UNDER
+        elif self.match('HS', 'DEEP', 'RECENT'):
+            txt = 'Haemorrhagic stroke, deep, recent'
+        elif self.match('HS', 'DEEP', 'OLD'):
+            txt = 'Haemorrhagic stroke, deep, old'
+        elif self.match('HS', 'CORTICAL', 'RECENT'):
+            txt = 'Haemorrhagic stroke, lobar, recent'
+        elif self.match('HS', 'CORTICAL', 'OLD'):
+            txt = 'Haemorrhagic stroke, lobar, old'
+        elif self.match('HS'):
+            txt = self.HS_UNDER
+        elif self.match('S'):
+            txt = 'Stroke, underspecified'
+        elif self.match('MT'):
+            txt = 'Tumour, meningioma'
+        elif self.match('MST'):
+            txt = 'Tumour, metastasis'
+        elif self.match('GT'):
+            txt = 'Tumour, glioma'
+        elif self.match('T'):
+            txt = self.TU_OTHER
+        elif self.match('SVD'):
+            txt = 'Small vessel disease'
+        elif self.match('A'):
+            txt = 'Atrophy'
+        elif self.match('SBH'):
+            txt = 'Subdural haematoma'
+        # NOTE: we can't check for aneurysmal at this stage as EdIE-R does
+        # we don't have the information here.
+        # TODO: Subarachnoid haemorrhage, aneurysmal
+        elif self.match('SH'):
+            txt = 'Subarachnoid haemorrhage, other'
+        elif self.match('MH', 'DEEP'):
+            txt = 'Microbleed, deep'
+        elif self.match('MH', 'CORTICAL'):
+            txt = 'Microbleed, lobar'
+        elif self.match('MH'):
+            txt = self.MB_UNDER
+        elif self.match('HT'):
+            txt = 'Haemorrhagic transformation'
+        return txt
+
+    def to_xml(self):
+
+        label_xml = ET.Element(EdIEDoc.XML_ENTITY)
+        label_xml.set(EdIEDoc.XML_ENTITY_TYPE, 'label:%s' % self.text)
+        label_xml.set(EdIEDoc.XML_ID, self.get_or_create_id())
+
+        return label_xml
