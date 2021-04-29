@@ -4,7 +4,7 @@ set -o pipefail
 
 FNAME="kim-2019.csv"
 
-wget -O $FNAME -q --show-progress https://doi.org/10.1371/journal.pone.0212778.s002
+wget -O $FNAME -q https://doi.org/10.1371/journal.pone.0212778.s002
 
 if [ $? -eq 0 ]; then
 	echo '## Downloaded AIS dataset successfully...'
