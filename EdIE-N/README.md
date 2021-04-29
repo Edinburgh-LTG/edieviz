@@ -10,7 +10,6 @@ python3.7 -m venv .env
 source .env/bin/activate
 pip install -r requirements.txt
 pip install -e .
-# EDIEN_PATH is the absolute path to the EdIE-N folder
 export EDIEN_PATH="$EDIEN_ROOT"
 export EDIER_RUN="$EDIEN_ROOT/EdIE-R/scripts/run-edier"
 ```
