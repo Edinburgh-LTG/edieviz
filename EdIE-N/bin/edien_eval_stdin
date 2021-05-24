@@ -34,7 +34,13 @@ def get_edier_output(text):
     standoff = tuple(root.iter(EdIEDoc.XML_STANDOFF))
     assert(len(standoff) == 1)
     standoff = standoff[0]
-    standoff.find(EdIEDoc.XML_ST_ENTS).set('source', 'EdIE-R')
+    ents = standoff.find(EdIEDoc.XML_ST_ENTS)
+    if ents is not None:
+        ents.set('source', 'EdIE-R')
+    else:
+        ents = ET.Element(EdIEDoc.XML_ST_ENTS)
+        ents.set('source', 'EdIE-R')
+        standoff.append(ents)
 
     documents = []
     for doc_tag in root.iter('document'):
