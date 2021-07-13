@@ -4,7 +4,8 @@ import torch.nn.functional as F
 from itertools import chain
 from edien.crf import CRF
 from edien.preprocess import VariableSequencePacker
-from pytorch_transformers import BertModel, BertConfig
+import pytorch_transformers as old_transformers
+import transformers
 
 
 class PaddedBatchNorm(torch.nn.Module):
@@ -445,13 +446,21 @@ class BiLSTMSentenceEncoder(torch.nn.Module):
 
 class BertSentenceEncoder(torch.nn.Module):
 
-    def __init__(self, bert_file, inputs):
+    def __init__(self, bert_file, inputs, legacy=True):
         super(BertSentenceEncoder, self).__init__()
 
         self.bert_file = bert_file
-        # self.encoder = BertModel.from_pretrained(self.bert_file)
-        self.config = BertConfig()
-        self.encoder = BertModel(self.config)
+        # Sorry folks, this library changed a lot in a year!
+        # The KNN experiments have been updated to a more recent version
+        # of transformers but the models were trained using pytorch_transformers
+        if legacy:
+            self.config = old_transformers.BertConfig()
+            self.encoder = old_transformers.BertModel(self.config)
+            # NOTE: If you want to train a model starting with a pretrained
+            # encoder, uncomment the line below:
+            # self.encoder = old_transformers.AutoModel.from_pretrained(self.bert_file)
+        else:
+            self.encoder = transformers.AutoModel.from_pretrained(self.bert_file)
         self.inputs = inputs
 
     def forward(self, X, sent_lens):
