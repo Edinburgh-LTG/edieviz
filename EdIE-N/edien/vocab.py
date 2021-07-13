@@ -6,6 +6,7 @@ from shutil import copyfile
 from collections import Counter, defaultdict
 from edien.utils import deep_unpack, deep_apply
 from pytorch_transformers import BertTokenizer
+from transformers import AutoTokenizer
 
 
 # Below classes are assumed to have:
@@ -315,3 +316,102 @@ class BertCoder(object):
 
     def save(self, filename):
         copyfile(self.bert_filename, filename)
+
+
+# Below is an adaptation of BERTCoder to updated hugging-face API
+# Assumes you request what tokenizer to download
+class TransformerCoder(object):
+
+    def __init__(self,
+                 filename,
+                 do_lower_case=False,
+                 word_boundaries=False):
+        self.filename = filename
+        self.do_lower_case = do_lower_case
+        self.do_basic_tokenize = False
+        # Hack around the fact that we need to know the word boundaries
+        self.word_boundaries = word_boundaries
+
+    def __len__(self):
+        return self.tokenizer.vocab_size
+
+    def fit(self, tokens):
+        # NOTE: We allow the model to use default: do_basic_tokenize.
+        # This potentially splits tokens into more tokens apart from subtokens:
+        # eg. Mr.Doe -> Mr . D ##oe  (Note that . is not preceded by ##)
+        # We take this into account when creating the token_flags in
+        # function text_to_token_flags
+        self.tokenizer = AutoTokenizer.from_pretrained(self.filename,
+                                                       use_fast=False,
+                                                       # do_basic_tokenize=self.do_basic_tokenize,
+                                                       do_lower_case=self.do_lower_case)
+        return self
+
+    def text_to_token_flags(self, text):
+        """Return a tuple representing which subtokens are the beginning of a
+        token. This is needed for NER using BERT:
+
+        https://arxiv.org/pdf/1810.04805.pdf:
+
+        "We use the representation of the first sub-token as the input to the
+        token-level classifier over the NER label set."
+
+        """
+        text = self.tokenizer.basic_tokenizer._run_strip_accents(text)
+        token_flags = []
+        if self.do_lower_case:
+            actual_split = text.lower().split()
+        else:
+            actual_split = text.split()
+
+        bert_tokens = []
+        for token in actual_split:
+            local_bert_tokens = self.tokenizer.tokenize(token) or ['[UNK]']
+            token_flags.append(1)
+            for more in local_bert_tokens[1:]:
+                token_flags.append(0)
+            bert_tokens.extend(local_bert_tokens)
+        # assert len(actual_tokens) == 0, [actual_tokens, actual_split, bert_tokens]
+        assert len(token_flags) == len(bert_tokens), [actual_split, bert_tokens]
+        assert sum(token_flags) == len(actual_split)
+        return tuple(token_flags)
+
+    def encode(self, tokens):
+        # Sometimes tokens include whitespace!
+        # for sent_tokens in tokens:
+        #     for token in sent_tokens:
+        #         if ' ' in token:
+        #             print(token)
+        # The AIS dataset has a token ". .", for example.
+        sent_tokens_no_ws = [[token.replace(' ', '') for token in sent_tokens]
+                             for sent_tokens in tokens]
+        texts = (' '.join(sent_tokens) for sent_tokens in sent_tokens_no_ws)
+        if self.word_boundaries:
+            encoded = tuple(self.text_to_token_flags(text)
+                            for text in texts)
+            # encoded = tuple(tuple(0 if token.startswith('##') else 1
+            #                       for token in self.tokenizer.tokenize(text))
+            #                 for text in texts)
+        else:
+            # Adds CLS and SEP
+            encoded = tuple(tuple(self.tokenizer.encode(text, add_special_tokens=True))
+                            for text in texts)
+        return encoded
+
+    def decode(self, ids):
+        if self.word_boundaries:
+            return []
+        else:
+            # NOTE: we only encode a single sentence, so use [0]
+            return tuple(tuple(self.tokenizer.decode(sent_ids, clean_up_tokenization_spaces=False).split())
+                         for sent_ids in ids)
+
+    def load(self):
+        self.tokenizer = AutoTokenizer.from_pretrained(self.filename,
+                                                       use_fast=False,
+                                                       # do_basic_tokenize=self.do_basic_tokenize,
+                                                       do_lower_case=self.do_lower_case)
+        return self
+
+    def save(self, filename):
+        pass
