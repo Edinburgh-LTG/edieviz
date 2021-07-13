@@ -18,6 +18,6 @@ setup(
       # We are depending on dict order insertion (new in 3.7)
       # + we are using dataclasses
       python_requires='>=3.7',
-      install_requires=['torch==1.3.0', 'mlconf==0.0.7'],
+      install_requires=['torch==1.6.0', 'mlconf==0.0.7'],
       tests_require=['pytest']
 )
