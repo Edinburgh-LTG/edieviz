@@ -3,10 +3,11 @@ import os
 import yaml
 from collections import namedtuple
 from itertools import chain
-from edien.vocab import Vocab
+from edien.vocab import Vocab, TransformerCoder
 from edien.utils import deep_unpack
 
 from edien.data.ess import EdIELoader, EdIEDataset
+from edien.data.conll import CoNLLLoader, CoNLLDataset
 
 
 class DatasetEncoder(object):
@@ -174,6 +175,9 @@ class VocabEncoder(object):
             if self.load_if_exists and os.path.isfile(vocab_path):
                 vocab = v.load(vocab_path)
                 print('Found vocab for %s in file %s' % (k, vocab_path))
+            elif isinstance(v, TransformerCoder):
+                vocab = v.load()
+                print('Loading cached vocab for %s' % k)
             else:
                 if data is not None:
                     # Try to find attribute this belongs to
