@@ -3,16 +3,25 @@
 
 ## Install
 
+From the project root `edieviz` folder, set the following environment variables:
+
 ```bash
 export EDIEN_ROOT="$(pwd)"
+export EDIEN_PATH="$EDIEN_ROOT"
+export EDIER_RUN="$EDIEN_ROOT/EdIE-R/scripts/run-edier"
+```
+
+The above are used to obtain absolute paths to the [EdIE-R](../EdIE-R/scripts/run-edier) script and [datasets](../datasets) folder, among others.
+
+Then install EdIE-N dependencies in a virtual environment and the EdIE-N library itself.
+
+```bash
 cd EdIE-N
 python3.7 -m venv .env
 source .env/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 pip install -e .
-export EDIEN_PATH="$EDIEN_ROOT"
-export EDIER_RUN="$EDIEN_ROOT/EdIE-R/scripts/run-edier"
 ```
 
 
