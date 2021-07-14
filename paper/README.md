@@ -116,3 +116,7 @@ bash print_ais_results.sh ../../models/LOUHI-ncbi-bert/output/documents.xml
 	bash generate_error_results.sh
 	python plot_error_breakdown.py --results all_results
 	```
+
+## Running KNN on a dataset
+
+See [knn/README.md](knn/README.md)

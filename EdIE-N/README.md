@@ -8,6 +8,7 @@ export EDIEN_ROOT="$(pwd)"
 cd EdIE-N
 python3.7 -m venv .env
 source .env/bin/activate
+pip install --upgrade pip
 pip install -r requirements.txt
 pip install -e .
 export EDIEN_PATH="$EDIEN_ROOT"
@@ -98,6 +99,8 @@ Also run the same steps as above for `LOUHI-ncbi-bert`.
 **Note: results will differ slightly if training is performed on CPU.**
 
 In order to train a model on your own data you will need to define a data loader following the example in *edien/data/ess.py*.
+
+If you want to use a pretrained transformer model as an encoder, you need to uncomment line 461 in [edien/components.py](edien/components.py).
 
 The model choices specified in the paper are reflected in the blueprint **EdIE-N-v1.yaml**.
 

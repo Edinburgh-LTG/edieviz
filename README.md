@@ -24,7 +24,7 @@ git clone https://github.com/Edinburgh-LTG/edieviz
 ```
 
 For instructions on how to install and run each system refer to the README files in their corresponding folders.
-The instructions **assume that you are in the corresponding folder** (eg. EdIE-N folder to install EdIE-N)
+The instructions **assume that you are in the corresponding folder** (eg. [EdIE-N](EdIE-N/README.md) folder to install EdIE-N)
 
 Tested on:
 
