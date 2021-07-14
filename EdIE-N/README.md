@@ -107,7 +107,8 @@ Also run the same steps as above for `LOUHI-ncbi-bert`.
 
 **Note: results will differ slightly if training is performed on CPU.**
 
-In order to train a model on your own data you will need to define a data loader following the example in *edien/data/ess.py*.
+In order to train a model on your own data you will need to define a data loader following the example in [edien/data/ess.py](edien/data/ess.py).
+There is also a more general CoNLL format loader [edien/data/conll.py](edien/data/conll.py) that may be easier to adjust.
 
 If you want to use a pretrained transformer model as an encoder, you need to uncomment line 461 in [edien/components.py](edien/components.py).
 
