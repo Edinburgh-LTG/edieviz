@@ -1,4 +1,4 @@
-# K nearest neighbour annotations for error analysis
+# K Nearest Neighbour annotations for error analysis
 
 This folder contains code to reproduce sections 6.1 and 6.2 from the paper.
 However, since the ESS dataset isn't widely available, we use the [NCBI Disease](http://www.ncbi.nlm.nih.gov/CBBresearch/Dogan/DISEASE/)
@@ -12,7 +12,7 @@ This can then help judge whether similar tokens in the dataset have been annotat
 ## Installation
 
 * Download the NCBI Corpus by running [the get_dataset.sh script](../../datasets/ncbi-disease/get_dataset.sh).
-* Make sure you have followed the installation steps in the [EdIE-N folder](../../EdIE-N/README.md).
+* Make sure you have followed the installation steps (first block) in the [EdIE-N folder](../../EdIE-N/README.md).
 
 # 1. Fit the index
 
