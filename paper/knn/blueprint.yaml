@@ -1,0 +1,80 @@
+pretrained_model: &pretrained bionlp/bluebert_pubmed_uncased_L-12_H-768_A-12
+# pretrained_model: &pretrained emilyalsentzer/Bio_ClinicalBERT
+# pretrained_model: &pretrained bert-base-uncased
+verbose: false
+continue_training: false
+name: KNN
+seed: 13
+device: &dev cpu
+paths:
+  $module: edien
+  $classname: EdIENPath
+  experiment_name: KNN_experiment
+data:
+  name: ess bert
+  $module: edien.data
+  $classname: DatasetEncoder
+  dataset:
+    $module: edien.data
+    $classname: CoNLLDataset
+    train_path: ncbi-disease/data/conll/train.tsv
+    dev_path: ncbi-disease/data/conll/devel.tsv
+    test_path: ncbi-disease/data/conll/test.tsv
+  inputs:
+  - tokens
+  - word_mask
+  targets:
+  - ner_tags
+  metrics: null
+  vocab_encoder:
+    $module: edien.data
+    $classname: VocabEncoder
+    load_if_exists: false
+    vocabs:
+      tokens:
+        $module: edien.vocab
+        $classname: TransformerCoder
+        filename: *pretrained
+        do_lower_case: true
+        word_boundaries: false
+      word_mask:
+        $module: edien.vocab
+        $classname: TransformerCoder
+        filename: *pretrained
+        do_lower_case: true
+        word_boundaries: true
+      ner_tags:
+        $module: edien.vocab
+        $classname: Vocab
+        handle_unk: false
+        filename: ner_tags.vocab
+        size: &labels 3
+        axis: 1
+  formatter:
+    $module: edien.data
+    $classname: Sentences
+model:
+  $module: edien.models
+  $classname: EdFactorN
+  optimizer: null
+  scheduler: null
+  model:
+    $module: edien.models
+    $classname: EdFFMT
+    encoder:
+      $module: edien.components
+      $classname: BertSentenceEncoder
+      inputs:
+      - tokens
+      - word_mask
+      bert_file: *pretrained
+      legacy: false
+    num_samples: 0
+    device: *dev
+    tasks:
+      ner_tags:
+        $module: edien.components
+        $classname: TaskMLP
+        in_dim: 768
+        hidden_dim: 0
+        num_labels: *labels
