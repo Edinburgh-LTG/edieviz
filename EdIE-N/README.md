@@ -30,7 +30,7 @@ pip install -e .
 ```bash
 cd ../models
 bash download_models.sh
-cd EdIE-N
+cd ../EdIE-N
 ```
 
 
