@@ -16,6 +16,8 @@ This repository contains systems and tools for information extraction from brain
 * **EdIE-BERT**: Our neural network system with a BERT encoder
 * **EdIE-viz**: Contains code to run our web interface
 * **paper**: Contains scripts for reproducing our results
+  * [Reproduce Acute Ischemic Stroke dataset evaluation](paper/ais)
+  * [K Nearest Neighbours for error analysis](paper/knn)
 
 ## Installation
 
