@@ -3,7 +3,7 @@ numpy==1.17
 PyYAML==5.4
 scikit-learn==0.20.2
 pytorch_transformers==1.2.0
-transformers==4.5.0
+transformers==4.30.0
 tqdm==4.32.0
 torch==1.6.0
 mlconf==0.0.7
