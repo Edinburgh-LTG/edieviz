@@ -62,4 +62,4 @@ OS dependencies:
 ```
 
 ## Contact
-If you have any questions or feedback we would love to hear from you, please get in touch with [Andreas Grivas](https://grv.overfit.xyz/).
+If you have any questions or feedback we would love to hear from you, please get in touch with [Andreas Grivas](https://grv.unargmaxable.ai/).
